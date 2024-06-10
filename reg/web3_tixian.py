@@ -55,6 +55,11 @@ class Web3TiXian:
         return event_list
 
 
+def format_token_amount(raw_amount, decimals=18):
+    # 将字符串转换为浮点数，并应用小数位转换
+    formatted_amount = float(raw_amount) / (10 ** decimals)
+    # 返回格式化后的数值，保留两位小数
+    return "{:.2f}".format(formatted_amount)
 
 
 def process_Withdrawal_event(event_list):
@@ -102,19 +107,21 @@ def process_Withdrawal_event(event_list):
                 #     t_Remark='充值JZ'
                 
                   
+                amount10=float(format_token_amount(event_data['amount']))
+
                 ebcJiaSuShouYiJiLu.objects.create(
                     uidB=t_user.id,
                     fanHuan=event_data['amount'],
-                    Layer=event_data['layer'],
+                    Layer=8, #提现记录
                     cTime=event_data['time'], 
-                    Remark=t_user.id+t_Remark,
+                    Remark=str(t_user.id)+t_Remark,
                 )
-                logger.info('用户'+t_user.id+t_Remark+event_data['amount'] )
+                logger.info('用户'+str(t_user.id)+t_Remark+str(amount10) )
 
                 
         except Exception as e:
                     # 处理异常
-                    result = ["Failed-everybadyFan", f"ERROR: {e}"]
+                    result = ["Failed-tiXian", f"ERROR: {e}"]
                     print(result)
                     logger.info(result)
                     return result
@@ -125,7 +132,7 @@ def listen_to_Withdrawal_events():
 
     if not redis_client.exists('tiXianLatest_block'):
         # 如果不存在，则将 t_pyUserNumberAll 设置为 0
-        latest_block = 57917516
+        latest_block = 39480264
     else:
         # 如果存在，则从 Redis 中获取值
         latest_block = redis_client.get('tiXianLatest_block')  
@@ -134,6 +141,6 @@ def listen_to_Withdrawal_events():
     event_list = web3_client.listen_Withdrawal_events(int(latest_block))
     
     process_Withdrawal_event(event_list)
-    redis_client.set('tiXianLatest_block', str(latest_block + 9)) 
-    time.sleep(2)
+    redis_client.set('tiXianLatest_block', str(int(latest_block) + 9)) 
+   
   

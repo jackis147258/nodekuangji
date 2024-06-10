@@ -15,8 +15,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from reg.web3_utils import Web3Client,listen_to_deposit_events
-from reg.web3_tixian import listen_to_Withdrawal_events
+
 
 
 
@@ -181,16 +180,6 @@ def userTiXianTask():
 
 
 
-
-@shared_task
-def listen_toDeposit ():
-    listen_to_deposit_events()
-
-
-
-@shared_task
-def listen_toWithdrawal ():
-    listen_to_Withdrawal_events()
 
     # web3_client = Web3Client()
     # event_filter = web3_client.create_event_filter()

@@ -90,7 +90,7 @@ class CustomUser(MPTTModel, AbstractUser):
 
 
 
-# Layer= 0充值 1 代数 2 层数 3 #提现到账 日志 
+# Layer= 0充值 1 代数 2 层数 3 #提现到账 日志  8.提现记录
 class ebcJiaSuShouYiJiLu(models.Model):  
     uidA = models.FloatField(db_comment='用户A-发送方', verbose_name="用户A-发送方", blank=True, null=True, default=0.0)
     uidB = models.FloatField(db_comment='用户B-接收方',verbose_name="用户B-接收方", blank=True, null=True,default=0) 

@@ -34,12 +34,15 @@ class Web3Client:
     def listen_deposit_events(self,latest_block):
         
         # 从最新的 10 个区块中获取事件日志
-        # latest_block = self.web3.eth.block_number
-        from_block = latest_block - 10 if latest_block >= 10 else 0
+        # now_block = self.web3.eth.block_number
+        # if latest_block>now_block:
+        #     latest_block=now_block
+
+        from_block = latest_block - 20 if latest_block >= 10 else 0
         to_block = latest_block
 
         # 获取 Deposit 事件日志
-        events = self.contract.events.Deposit().get_logs(fromBlock=57923019, toBlock=57923019)
+        events = self.contract.events.Deposit().get_logs(fromBlock=from_block, toBlock=to_block)
 
         # 处理事件日志并提取所需数据  57917516
         event_list = []
@@ -56,7 +59,11 @@ class Web3Client:
         return event_list
 
 
-
+def format_token_amount(raw_amount, decimals=18):
+    # 将字符串转换为浮点数，并应用小数位转换
+    formatted_amount = float(raw_amount) / (10 ** decimals)
+    # 返回格式化后的数值，保留两位小数
+    return "{:.2f}".format(formatted_amount)
 
 def process_deposit_event(event_list):
     # Process the event (e.g., save to database, perform some action)
@@ -86,35 +93,36 @@ def process_deposit_event(event_list):
                     continue
                 #记录  添加余额   // layer==0  冲 usdt  1  yl   2 jz
                 t_Remark='充值**'
+                amount10=float(format_token_amount(event_data['amount']))
                 # 充值
                 if event_data['layer']==0:
-                    now_userToken.usdtToken+=float(event_data['amount'])
+                    now_userToken.usdtToken+=amount10
                     now_userToken.save()
                     t_Remark='充值USDT'
                 if event_data['layer']==1:
-                    now_userToken.ylToken+=float(event_data['amount'])
+                    now_userToken.jzToken+=amount10
                     now_userToken.save()
                     t_Remark='充值YL'
                 if event_data['layer']==2:
-                    now_userToken.jzToken+=float(event_data['amount'])
+                    now_userToken.jzToken+=amount10
                     now_userToken.save()
                     t_Remark='充值JZ'
                 
                   
                 ebcJiaSuShouYiJiLu.objects.create(
                     uidB=t_user.id,
-                    fanHuan=event_data['amount'],
-                    Layer=event_data['layer'],
+                    fanHuan=amount10,
+                    Layer=0, #代表充值
                     cTime=event_data['time'], 
                     liuShuiId=event_data['lianId'],
                     Remark=t_Remark,
                 )
-                logger.info('用户'+t_user.id+t_Remark+event_data['amount'] )
+                logger.info('用户'+str(t_user.id)+t_Remark+str(amount10))
 
                 
         except Exception as e:
                     # 处理异常
-                    result = ["Failed-everybadyFan", f"ERROR: {e}"]
+                    result = ["Failed-chongzhi", f"ERROR: {e}"]
                     print(result)
                     logger.info(result)
                     return result
@@ -125,15 +133,30 @@ def listen_to_deposit_events():
 
     if not redis_client.exists('latest_block'):
         # 如果不存在，则将 t_pyUserNumberAll 设置为 0
-        latest_block = 57917516
+        latest_block = 39480264
     else:
         # 如果存在，则从 Redis 中获取值
         latest_block = redis_client.get('latest_block')  
+    
+    
       
     web3_client = Web3Client()
-    event_list = web3_client.listen_deposit_events(latest_block)
+    now_block = web3_client.web3.eth.block_number
+    if int(latest_block)>int(now_block):
+        latest_block=now_block
+      
+    event_list = web3_client.listen_deposit_events(int(latest_block))
     
     process_deposit_event(event_list)
-    redis_client.set('latest_block', latest_block+9) 
-    time.sleep(2)
+    redis_client.set('latest_block', str(int(latest_block) + 19)) 
+
+    # time.sleep(2)
+
+
+def listenDepositOne(qukuai):
+    web3_client = Web3Client()
+    # now_block = web3_client.web3.eth.block_number         
+    event_list = web3_client.listen_deposit_events(int(qukuai))    
+    process_deposit_event(event_list)
+    # redis_client.set('latest_block', str(int(latest_block) + 9)) 
   

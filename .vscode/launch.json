@@ -10,7 +10,7 @@
         "name": "Daphne1",
         "type": "python",
         "request": "launch",
-        "program": "${workspaceFolder}/venv1/bin/daphne",
+        "program": "${workspaceFolder}/venv/bin/daphne",
         "args": [
             "-b0.0.0.0",
             // "-b127.0.0.1",

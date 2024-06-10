@@ -179,15 +179,36 @@ jiantui_fenghong = {
 lou_ceng_gao_du = {
     0:'0号矿机:',
     1:'1号矿机:直推2人',
-    2:'2号矿机:直推2人且有一块二级土地,1500块金砖',
-    3:'3号矿机:直推2人且有一块三级土地可盖,3000块金砖',
-    4:'4号矿机:直推2人且有一块三级土地可盖,4000块金砖',
-    5:'5号矿机:直推2人且有一块三级土地可盖,10000块金砖',
-    6:'6号矿机:直推2人且有一块三级土地可盖,8000块金砖',
-    7:'7号矿机:直推2人且有一块三级土地可盖,8000块金砖',
-    8:'8号矿机:直推2人且有一块三级土地可盖,8000块金砖',
-    9:'9号矿机:直推2人且有一块三级土地可盖,8000块金砖',
-    10:'10号矿机:直推2人且有一块三级土地可盖,20000块金砖'    
+    2:'2号矿机:直推2人',
+    3:'3号矿机:直推2人',
+    4:'4号矿机:直推2人',
+    5:'5号矿机:直推2人',
+    6:'6号矿机:直推2人',
+    7:'7号矿机:直推2人',
+    8:'8号矿机:直推2人',
+    9:'9号矿机:直推2人',
+    10:'10号矿机:直推2人',   
+    11:'11号矿机:直推2人',
+    12:'12号矿机:直推2人',
+    13:'13号矿机:直推2人',
+    14:'14号矿机:直推2人',
+    15:'15号矿机:直推2人',
+    16:'16号矿机:直推2人',
+    17:'17号矿机:直推2人',
+    18:'18号矿机:直推2人',
+    19:'19号矿机:直推2人',
+    20:'20号矿机:直推2人',    
+    21:'21号矿机:直推2人',
+    22:'22号矿机:直推2人',
+    23:'23号矿机:直推2人',
+    24:'24号矿机:直推2人',
+    25:'25号矿机:直推2人',
+    26:'26号矿机:直推2人',
+    27:'27号矿机:直推2人',
+    28:'28号矿机:直推2人',
+    29:'29号矿机:直推2人',
+    30:'30号矿机:直推2人',     
+
 }
 
 lou_ceng_tu_di = {
@@ -256,7 +277,7 @@ def buynodeKJ(request):
                 if now_user.kapaiA<1:
                     return JsonResponse({'valid': False, 'message': '燃料包不够'})        
                 now_user.kapaiA=now_user.kapaiA-1
-                now_user.cengShu=kuangji
+                now_user.cengShu=kuangji+1
                 # now_user.status=1          #改变状态 1 不可以在次购买矿机          
                 now_user.save()
                 ebcJiaSuShouYiJiLu.objects.create(
@@ -267,7 +288,10 @@ def buynodeKJ(request):
                         Layer=0, #0代币 充值
                         Remark='扣除燃料包1张'        )
                 logger.info('扣除燃料包1张:'+now_user.username )   
-            
+            else:
+                now_user.cengShu=kuangji+1
+                # now_user.status=1          #改变状态 1 不可以在次购买矿机          
+                now_user.save()
             #扣除用户jz
             now_userToken.jzToken=now_userToken.jzToken-nodes_arr_siyang_payment['nodeKJ'+str(kuangji)]
             now_userToken.save()
@@ -524,6 +548,9 @@ def generate_signature(request):
     except ValueError:
         return JsonResponse({'valid': False, 'message': 'Amount 必须为 integer'})
 
+    
+
+
 
 
     now_user = User.objects.filter(username=user_address).first()  
@@ -534,6 +561,11 @@ def generate_signature(request):
     if  not now_userToken: 
         return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
     
+
+    amount10 = float(amount) / (10 ** 18)
+    if amount10 > now_userToken.jzToken:
+        return JsonResponse({'valid': False, 'message': '余额不足'}) 
+
 
     # 将地址编码为bytes
     encoded_data = eth_abi.encode([ 'uint256','uint256'], [ amount,timestamp])    
@@ -550,19 +582,22 @@ def generate_signature(request):
     signature = signed_message.signature.hex()
 
 
+ 
+
+
     # 写入记录     
     t_payToken=payToken ()
     # t_payToken.uidA=t_user   #发送方
     t_payToken.uidB=now_user.id  # 接收方
     t_payToken.status=0  # 
     t_payToken.Layer=0        
-    t_payToken.amount=amount
+    t_payToken.amount=amount10
     t_payToken.tiXianWallter=user_address
     t_payToken.HashId=message_hash_hex
     t_payToken.Remark='用户提现'    
     t_payToken.save()  
     # 扣费
-    now_userToken.jzToken-=amount
+    now_userToken.jzToken-=amount10
     now_userToken.save()
     
     

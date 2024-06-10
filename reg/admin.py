@@ -351,6 +351,13 @@ class  payTokenAdmin(AjaxAdmin):
             # 提现
             if int_value==4:
                 web3_tixian.listen_to_Withdrawal_events()
+
+              # 充值 单独
+            if int_value==5:                
+                qukuai=post.get('qukuai')  
+                web3_utils.listenDepositOne(qukuai)
+
+            
             # if t_return is not None:
             #     createEbcUser(t_return)
             # t_taskId = tokenNewUserList.delay()
@@ -409,10 +416,22 @@ class  payTokenAdmin(AjaxAdmin):
             # key 对应post参数中的key
             'key': 'name',
             # 显示的文本
-            'label': '1提现 2处理hash',
+            'label': '1提现 2处理hash 3充值 4 提现 5 充值区块' ,
             # 为空校验，默认为False
             'require': True
-        },       
+        },      
+         {
+            # 这里的type 对应el-input的原生input属性，默认为input
+            'type': 'input',
+            # key 对应post参数中的key
+            'key': 'qukuai',
+            # 显示的文本
+            'label': '区块数字',    
+             # 设置默认值
+            'value': '3546455'    ,    
+            # 为空校验，默认为False
+            'require': True
+        }, 
                    ]
     }
 

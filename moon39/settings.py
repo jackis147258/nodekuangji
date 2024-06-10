@@ -123,6 +123,7 @@ DATABASES = {
         'PORT': config('DATABASE_PORT', default=''),
         'USER': config('DATABASE_USER', default=''),
         'PASSWORD': config('DATABASE_PASSWORD', default=''),
+      
     },
     'db1': {
         'ENGINE': config('DATABASE_ENGINE1', default='django.db.backends.mysql'),
