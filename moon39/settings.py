@@ -408,7 +408,7 @@ LOGGING = {
             'formatter': 'verbose',
         },
         'celery_file': {
-            'level': 'DEBUG',  # 确保捕获所有级别的日志
+            'level': 'INFO',  # 确保捕获所有级别的日志
             'class': 'logging.FileHandler',
             'filename': os.path.join(BASE_DIR, 'celery_debug.log'),
             'formatter': 'verbose',

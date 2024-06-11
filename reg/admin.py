@@ -307,7 +307,7 @@ class  payTokenAdmin(AjaxAdmin):
     fieldsets = (
         (None, {
             
-            'fields':  ('TxHash','uidB','status' ,'amount','Layer','liuShuiId','Remark' , )
+            'fields':  ('TxHash','uidB','status' ,'amount','Layer','liuShuiId','Remark','HashId' , )
         }),
     )
 
@@ -356,7 +356,12 @@ class  payTokenAdmin(AjaxAdmin):
             if int_value==5:                
                 qukuai=post.get('qukuai')  
                 web3_utils.listenDepositOne(qukuai)
+            
 
+                # 提现 单独
+            if int_value==6:                
+                qukuai=post.get('qukuai')  
+                web3_tixian.listen_to_Withdrawal_eventsOne(qukuai)
             
             # if t_return is not None:
             #     createEbcUser(t_return)
@@ -416,7 +421,7 @@ class  payTokenAdmin(AjaxAdmin):
             # key 对应post参数中的key
             'key': 'name',
             # 显示的文本
-            'label': '1提现 2处理hash 3充值 4 提现 5 充值区块' ,
+            'label': '1提现 2处理hash 3充值 4 提现 5 充值区块 6提现区块' ,
             # 为空校验，默认为False
             'require': True
         },      
@@ -456,6 +461,8 @@ class  userTokenAdmin(AjaxAdmin):
     list_display = ('id','usdtToken','ylToken','jzToken','status' ,'uid','cTime' ,'Remark' ,       )
     
     list_filter = ('status', 'usdtToken')  # 添加筛选器
-    search_fields = ('usdtToken', 'id')  # 添加搜索字段
+    # search_fields = ('uid', 'id')  # 添加搜索字段
+    search_fields = ('id', 'uid__username')  # 添加搜索字段
+
         
     

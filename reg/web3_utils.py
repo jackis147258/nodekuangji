@@ -76,7 +76,7 @@ def process_deposit_event(event_list):
                 liuShuiIdObj=ebcJiaSuShouYiJiLu.objects.filter(liuShuiId=event_data['lianId']).first()
                 # 表示已经处理过流水
                 if liuShuiIdObj:                    
-                    logger.info('该笔流水已处理 id:'+event_data['lianId'] +' 用户:'+str(event_data['user']) )
+                    logger.info('该笔流水已处理 id:'+str(event_data['lianId']) +' 用户:'+str(event_data['user']) )
                     continue
 
                 # 获得用户 对象
@@ -89,7 +89,7 @@ def process_deposit_event(event_list):
                 
                 now_userToken = t_user.usertoken_set.first()     # type: Optional[userToken] 
                 if  not now_userToken:                    
-                    logger.info('获取用户充值记录'+t_user.id+'用户token不存在' )
+                    logger.info('获取用户充值记录'+str(t_user.id)+'用户token不存在' )
                     continue
                 #记录  添加余额   // layer==0  冲 usdt  1  yl   2 jz
                 t_Remark='充值**'
@@ -102,7 +102,7 @@ def process_deposit_event(event_list):
                 if event_data['layer']==1:
                     now_userToken.jzToken+=amount10
                     now_userToken.save()
-                    t_Remark='充值YL'
+                    t_Remark='充值YS'
                 if event_data['layer']==2:
                     now_userToken.jzToken+=amount10
                     now_userToken.save()
@@ -113,6 +113,7 @@ def process_deposit_event(event_list):
                     uidB=t_user.id,
                     fanHuan=amount10,
                     Layer=0, #代表充值
+                    status=1,  #已转
                     cTime=event_data['time'], 
                     liuShuiId=event_data['lianId'],
                     Remark=t_Remark,
@@ -127,6 +128,7 @@ def process_deposit_event(event_list):
                     logger.info(result)
                     return result
     # Add your processing logic here
+    logger.info('获取用户充值记录'+'结束' )
 
  
 def listen_to_deposit_events():

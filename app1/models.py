@@ -219,6 +219,10 @@ class webInfo(models.Model):
     Str9 = models.CharField(max_length=255,blank=True, null=True, db_comment='str')
     Str10 = models.CharField(max_length=255,blank=True, null=True, db_comment='str')
 
+    # 站点 奖金池
+    jiangJinChi= models.FloatField(db_comment='奖金池',verbose_name="奖金池", blank=True, null=True,default=0)
+
+
 
 
     def __str__(self):

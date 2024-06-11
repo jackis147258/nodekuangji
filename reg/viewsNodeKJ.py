@@ -71,6 +71,7 @@ import eth_abi
 from eth_utils import to_bytes
 from eth_utils import to_bytes, to_checksum_address
 
+from app1.models import webInfo
 
 
 # 导入必要的模块
@@ -272,13 +273,26 @@ def buynodeKJ(request):
    
     try:
         with transaction.atomic():
+             #临时处理 老用户
+            if kuangji == 0:   
+                if now_user.cengShu==0:
+                    now_user.cengShu=1
+                    now_user.save()
+
             #扣除用户燃料包
             if kuangji != 0:   
+                # 扣除卡牌
                 if now_user.kapaiA<1:
-                    return JsonResponse({'valid': False, 'message': '燃料包不够'})        
+                    return JsonResponse({'valid': False, 'message': '燃料包不够'})
+                # 直接在数据库层面进行过滤和计数
+                qualified_children_count = now_user.get_children().filter(cengShu__gte=2).count()
+                # 不满足 增加两个 有效人数
+                if kuangji!=1:
+                    if qualified_children_count-now_user.zhiTuiNum<=1:
+                        return JsonResponse({'valid': False, 'message':'不满足增加两个有效人数'})                 
                 now_user.kapaiA=now_user.kapaiA-1
                 now_user.cengShu=kuangji+1
-                # now_user.status=1          #改变状态 1 不可以在次购买矿机          
+                now_user.zhiTuiNum= qualified_children_count         #设置当前有效直推人数          
                 now_user.save()
                 ebcJiaSuShouYiJiLu.objects.create(
                         uidB=now_user.id,
@@ -288,14 +302,10 @@ def buynodeKJ(request):
                         Layer=0, #0代币 充值
                         Remark='扣除燃料包1张'        )
                 logger.info('扣除燃料包1张:'+now_user.username )   
-            else:
-                now_user.cengShu=kuangji+1
-                # now_user.status=1          #改变状态 1 不可以在次购买矿机          
-                now_user.save()
+        
             #扣除用户jz
             now_userToken.jzToken=now_userToken.jzToken-nodes_arr_siyang_payment['nodeKJ'+str(kuangji)]
             now_userToken.save()
-
 
             # 记录质押矿机 信息
             new_tokenZhiYaJiShi =tokenZhiYaJiShi.objects.create(
@@ -326,12 +336,15 @@ def buynodeKJ(request):
         logger.info('成功质押矿机:'+str(now_user.username) )
         # 处理分润
         # nodeKjFenRun.FenRunUser(now_user)
+
+        return JsonResponse({'valid': True, 'message': '矿机质押成功' })
+
  
-        isOk,message=nodeKjFenRun.userFenRun(now_user,new_tokenZhiYaJiShi.amount,0,nodes_att_daily_rate['nodeKJ'+str(kuangji)])
-        if isOk:
-            return JsonResponse({'valid': True, 'message': '矿机质押成功'+'分润成功'})
-        else:
-            return JsonResponse({'valid': False, 'message':'矿机质押成功'+'分润问题:'+ message})
+        # isOk,message=nodeKjFenRun.userFenRun(now_user,new_tokenZhiYaJiShi.amount,0,nodes_att_daily_rate['nodeKJ'+str(kuangji)])
+        # if isOk:
+        #     return JsonResponse({'valid': True, 'message': '矿机质押成功'+'分润成功'})
+        # else:
+        #     return JsonResponse({'valid': False, 'message':'矿机质押成功'+'分润问题:'+ message})
         
     except Exception as e:
         # 处理异常
@@ -494,8 +507,11 @@ def getKJDayFanHuan(request):
 
         # 矿机质押 * 对应利润
         t_liRun=t_kuangJi.amount * nodes_att_daily_rate['nodeKJ'+str(t_kuangJi.nodeKjCode)]/100
-        now_userToken.jzToken+=t_liRun
-        now_userToken.save()
+        # now_userToken.jzToken+=t_liRun
+        # now_userToken.save()
+
+        now_user.fanHuan+=t_liRun
+        now_user.save()
            
         # 写入记录     
         t_ebcJiaSuShouYiJiLu=ebcJiaSuShouYiJiLu ()
@@ -533,7 +549,7 @@ SECRET_KEY = '0x9ba61124ddeb2c0c444ac5b643833bf24421d97eed3c9ede44a771319054bc9d
 #     return signature, timestamp
 
 
-
+# 提现
 @api_view(["POST"])
 def generate_signature(request):
     user_address = request.data.get('username')
@@ -548,11 +564,6 @@ def generate_signature(request):
     except ValueError:
         return JsonResponse({'valid': False, 'message': 'Amount 必须为 integer'})
 
-    
-
-
-
-
     now_user = User.objects.filter(username=user_address).first()  
     if not now_user:
         return JsonResponse({'valid': False, 'message': '用户不存在'})
@@ -562,9 +573,14 @@ def generate_signature(request):
         return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
     
 
+    # amount10 = float(amount) / (10 ** 18)
+    # if amount10 > now_userToken.jzToken:
+    #     return JsonResponse({'valid': False, 'message': '余额不足'}) 
+
     amount10 = float(amount) / (10 ** 18)
-    if amount10 > now_userToken.jzToken:
-        return JsonResponse({'valid': False, 'message': '余额不足'}) 
+    if amount10 > float(now_user.fanHuan):
+        return JsonResponse({'valid': False, 'message': '可返还余额不足'}) 
+
 
 
     # 将地址编码为bytes
@@ -597,9 +613,18 @@ def generate_signature(request):
     t_payToken.Remark='用户提现'    
     t_payToken.save()  
     # 扣费
-    now_userToken.jzToken-=amount10
-    now_userToken.save()
+    now_user.fanHuan-=amount10
+    now_user.save()
+    # now_userToken.jzToken-=amount10
+    # now_userToken.save()
+    # 10% 记录到 奖金池
+      # 计入奖金池
+    now_webid = webInfo.objects.filter(webid=3).first()     
+
     
+    now_webid.jiangJinChi=now_webid.jiangJinChi+(amount10*0.1)
+    now_webid.save()
+
     
 
     result = {

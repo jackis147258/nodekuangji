@@ -22,7 +22,7 @@ User = get_user_model()
 from typing import Type
 from .  import ebcFenRun
 from typing import Optional
-
+from app1.models import webInfo
 # def FenRunUser(userName):
 #     tokenZhiYaList=tokenZhiYaJiShi.objects.filter(status=0,tokenName=config('TOKEN_NAME2', default=''),uid=userName)
 #     for tokenZhiYa in tokenZhiYaList:  
@@ -60,12 +60,21 @@ def userFenRun(t_user,amount,layer,Percent):  # amount 分润基数  layer 类�
         layerName=""
         if layer==0:#矿机 计算    
             #  推广入金收益的1.5倍 的百分之一 的 百分之六 人加速        
-            t_jiasu10=amount*Percent/100  
+            # t_jiasu10=amount*Percent/100  
+            t_jiasu10=float(amount)*0.045  
+            t_jiasuJiangJinChi=float(amount)*0.005 
             layerName="质押矿机" 
         if layer==1:           
             #  layer==1 输入 获取日返还的百分之六 人加速         
-            t_jiasu10=amount*Percent/100  
+            # t_jiasu10=amount*Percent/100  
+            t_jiasu10=amount*0.045  
+            t_jiasuJiangJinChi=amount*0.005
             layerName="单日返利" 
+
+        
+        # 同级别不重复
+        t_best=t_user.cengShu
+
         t_parent_id=t_user.parent_id    
         # t_parent_id=t_user.id    
         for i in range(0, 10, 1): #执行10次 向上找10级        
@@ -81,23 +90,32 @@ def userFenRun(t_user,amount,layer,Percent):  # amount 分润基数  layer 类�
                 # 处理 parentUser 不存在的情况
                 continue
             if parentUser.fanHuan is None:
-                parentUser.fanHuan=0                    
+                parentUser.fanHuan=0   
+            # #  是否跨级
+            if parentUser.cengShu <= t_best:
+                logger.info('用户id:'+str(t_parent_id) +t_user.username+'低于反润级别拿不到代数分润' )
+                continue
+            t_best=parentUser.cengShu
+
             children_count = parentUser.get_children().count()  
             # 看是否满足返还条件
             if isFanDai(i,children_count):                 
                 try:
                     with transaction.atomic():                        
-                        # parentUser.fanHuan+=t_jiasu10
-                        # parentUser.save()
+                        parentUser.fanHuan+=t_jiasu10
+                        parentUser.save()
 
-                        now_parentToken = parentUser.usertoken_set.first()     # type: Optional[userToken] 
-                        if  not now_parentToken: 
-                            # return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
-                            logger.info('用户token不存在,用户id:'+str(parentUser.id)  )        
+                        # now_parentToken = parentUser.usertoken_set.first()     # type: Optional[userToken] 
+                        # if  not now_parentToken: 
+                        #     # return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
+                        #     logger.info('用户token不存在,用户id:'+str(parentUser.id)  )        
 
-                            return  False, '用户token不存在'
-                        now_parentToken.jzToken+=t_jiasu10
-                        now_parentToken.save()
+                        #     return  False, '用户token不存在'
+                        # now_parentToken.jzToken+=t_jiasu10
+                        # now_parentToken.save()
+
+                         
+
                         # 写入记录     
                         t_ebcJiaSuShouYiJiLu=ebcJiaSuShouYiJiLu ()
                         t_ebcJiaSuShouYiJiLu.uidA=t_user.id   #发送方
@@ -105,8 +123,17 @@ def userFenRun(t_user,amount,layer,Percent):  # amount 分润基数  layer 类�
                         t_ebcJiaSuShouYiJiLu.status=1  #已转
                         t_ebcJiaSuShouYiJiLu.Layer=1  # 0充值 1 代数 2 层数 
                         t_ebcJiaSuShouYiJiLu.fanHuan=t_jiasu10
-                        t_ebcJiaSuShouYiJiLu.Remark='代数返加速'+layerName+str(t_jiasu10)      #'返6%'    
-                        t_ebcJiaSuShouYiJiLu.save()                          
+                        t_ebcJiaSuShouYiJiLu.Remark='代数返奖励'+layerName+str(t_jiasu10)      #'返4.5%'    
+                        t_ebcJiaSuShouYiJiLu.save()   
+                        # 计入奖金池
+                        # t_jiasuJiangJinChi
+
+                        now_webid = webInfo.objects.filter(webid=3).first()    
+                        now_webid.jiangJinChi=now_webid.jiangJinChi+t_jiasuJiangJinChi
+                        now_webid.save()
+
+                        # webInfo.jiangJinChi+=t_jiasuJiangJinChi
+                        # webInfo.save()
                 except Exception as e:
                     # 处理错误，此时事务已经回滚 
                     result = ["Failed-userFenRun", f"ERROR: {e}"]

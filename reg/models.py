@@ -50,7 +50,7 @@ class CustomUser(MPTTModel, AbstractUser):
 
     tuanduiLevel = models.IntegerField(db_comment='团队等级',blank=True, null=True,default=0)
 
-    cengShu = models.IntegerField(db_comment='当前矿机code',blank=True, null=True,default=0)
+    cengShu = models.IntegerField(db_comment='当前矿机code',blank=True, null=True,default=1)
 
     zhiTuiNum = models.IntegerField(db_comment='暂存直推人数',blank=True, null=True,default=0)
 
@@ -220,9 +220,9 @@ class payToken(models.Model):
  
     class Meta:      
         db_table = 't_payToken'
-        db_table_comment = '支付流水'
+        db_table_comment = '提现流水'
         # verbose_name="task地址"
-        verbose_name_plural = "支付流水"  # 设置 admin 界面上模型的显示名称
+        verbose_name_plural = "提现流水"  # 设置 admin 界面上模型的显示名称
 
 
 

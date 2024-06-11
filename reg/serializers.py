@@ -77,7 +77,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
  
         return {
             "kuangJiShu": cengShu ,
-            "jiaGe": str(nodes_arr_siyang_payment['nodeKJ'+str(cengShu)])+'/YL/JZ'  ,
+            "jiaGe": str(nodes_arr_siyang_payment['nodeKJ'+str(cengShu)])+'/YS/JZ'  ,
             "tiaoJiao":lou_ceng_gao_du[cengShu] ,
             "riShouYi": '日收益'+str(nodes_att_daily_rate['nodeKJ'+str(cengShu)])+'%' ,
         }

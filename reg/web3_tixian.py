@@ -32,14 +32,15 @@ class Web3TiXian:
         self.contract = self.web3.eth.contract(address=pancakeRouterAddress, abi=pancakeAbi)
     
     def listen_Withdrawal_events(self,latest_block):
-        
+        logger.info('获取用户提现链上获取 ...' )
+
         # 从最新的 10 个区块中获取事件日志
         # latest_block = self.web3.eth.block_number
-        from_block = latest_block - 10 if latest_block >= 10 else 0
+        from_block = latest_block - 20 if latest_block >= 10 else 0
         to_block = latest_block
 
         # 获取 Deposit 事件日志
-        events = self.contract.events.Withdrawal().get_logs(fromBlock=57923019, toBlock=57923020)
+        events = self.contract.events.Withdrawal().get_logs(fromBlock=from_block, toBlock=to_block)
 
         # 处理事件日志并提取所需数据  57917516
         event_list = []
@@ -51,6 +52,7 @@ class Web3TiXian:
                 'hash': event['args']['hash'],
             }
             event_list.append(event_data)
+            logger.info('得到用户提现链上信息'+str(event_data['user'])+ str(event_data['amount']) )
         
         return event_list
 
@@ -69,11 +71,22 @@ def process_Withdrawal_event(event_list):
         try:
             with transaction.atomic():
                 # 判读id 是否重复 
+
+                data = event_data['hash']
+
+                # 使用 .hex() 方法将字节数据转换为十六进制字符串
+                hex_string = data.hex()
+
+                # 打印结果
+                # print(hex_string)
                 
-                payTokenObj=payToken.objects.filter(HashId=event_data['hash']).first()
+                payTokenObj=payToken.objects.filter(HashId=hex_string).first()
                 # 表示已经处理过流水
-                if payTokenObj:                    
-                    logger.info('该笔流水已处理 id:'+event_data['hash'] +' 用户:'+str(event_data['user']) )
+                if payTokenObj: 
+                    payTokenObj.status=3 #验证 成功  
+                    payTokenObj.save()
+
+                    logger.info('该笔流水已处理 id:'+str(hex_string) +' 用户:'+str(event_data['user']) )
                     continue
 
                 # 获得用户 对象
@@ -109,22 +122,23 @@ def process_Withdrawal_event(event_list):
                   
                 amount10=float(format_token_amount(event_data['amount']))
 
-                ebcJiaSuShouYiJiLu.objects.create(
-                    uidB=t_user.id,
-                    fanHuan=event_data['amount'],
-                    Layer=8, #提现记录
-                    cTime=event_data['time'], 
-                    Remark=str(t_user.id)+t_Remark,
-                )
+                # ebcJiaSuShouYiJiLu.objects.create(
+                #     uidB=t_user.id,
+                #     fanHuan=event_data['amount'],
+                #     Layer=8, #提现记录
+                #     status=1,  #已转
+                #     cTime=event_data['time'], 
+                #     Remark=str(t_user.id)+t_Remark+':'+str(event_data['hash']),
+                # )
                 logger.info('用户'+str(t_user.id)+t_Remark+str(amount10) )
-
-                
         except Exception as e:
                     # 处理异常
                     result = ["Failed-tiXian", f"ERROR: {e}"]
                     print(result)
                     logger.info(result)
                     return result
+    logger.info('获取用户提现记录结束' )
+
     # Add your processing logic here
 
  
@@ -141,6 +155,15 @@ def listen_to_Withdrawal_events():
     event_list = web3_client.listen_Withdrawal_events(int(latest_block))
     
     process_Withdrawal_event(event_list)
-    redis_client.set('tiXianLatest_block', str(int(latest_block) + 9)) 
+    redis_client.set('tiXianLatest_block', str(int(latest_block) + 19)) 
    
   
+
+def listen_to_Withdrawal_eventsOne(quKuai):
+
+    
+    web3_client = Web3TiXian()
+    event_list = web3_client.listen_Withdrawal_events(int(quKuai))
+    
+    process_Withdrawal_event(event_list)
+     
