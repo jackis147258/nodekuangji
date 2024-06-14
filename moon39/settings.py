@@ -185,7 +185,7 @@ LANGUAGE_CODE = 'zh-hans'
 # SIMPLEUI_LOGO = 'https://th.bing.com/th/id/R2411a2b340731d67dfa0d84503e915e3?rik=zmYce%2fLys72JVQ&pid=ImgRaw'
 
 # TIME_ZONE = 'UTC'
-TIME_ZONE = 'Asia/Shanghai'
+TIME_ZONE = 'Asia/Hong_Kong'
 
 
 USE_I18N = True
@@ -247,45 +247,45 @@ SIMPLEUI_CONFIG = {
      # 设置是否开启动态菜单, 默认为False. 如果开启, 则会在每次用户登陆时刷新展示菜单内容。
      # 一般建议关闭。
     'dynamic': False,
-    # 'menus': [
-    #     {
-    #         'app': 'app1',
-    #         'name': '量化方案',
-    #         'icon': 'fas fa-user-shield',
-    #         'url': '/admin/app1/t_quantify1/'             
-    #     },
-    #     {
-    #         'app': 'app1',
-    #         'name': 'tash事件',
-    #         'icon': 'fas fa-user-shield',
-    #         'url': '/admin/app1/t_task/'             
-    #     },
+    'menus': [
+        # {
+        #     'app': 'app1',
+        #     'name': '量化方案',
+        #     'icon': 'fas fa-user-shield',
+        #     'url': '/admin/app1/t_quantify1/'             
+        # },
+        # {
+        #     'app': 'app1',
+        #     'name': 'tash事件',
+        #     'icon': 'fas fa-user-shield',
+        #     'url': '/admin/app1/t_task/'             
+        # },
 
-    #     {
-    #         'name': '设置',
-    #         'icon': 'fa fa-th-list',
-    #         'models': [
-    #             {
-    #             'name': 'Token管理',
-    #             # 注意url按'/admin/应用名小写/模型名小写/'命名。 
-    #             'url': '/admin/app1/t_tokenaddr/',
-    #             'icon': 'fa fa-tasks'
-    #             },
-    #             {
-    #             'name': 'tash事件',
-    #             # 注意url按'/admin/应用名小写/模型名小写/'命名。 
-    #             'url': '/admin/app1/t_task/',
-    #             'icon': 'fa fa-tasks'
-    #             },
-    #             {
-    #             'name': '交易查看',
-    #             # 注意url按'/admin/应用名小写/模型名小写/'命名。 
-    #             'url': '/admin/app1/t_trade/',
-    #             'icon': 'fa fa-tasks'
-    #             },
-    #         ]
-    #     }, 
-    #  ]
+        {
+            'name': '设置',
+            'icon': 'fa fa-th-list',
+            'models': [
+                {
+                'name': '父级管理',
+                # 注意url按'/admin/应用名小写/模型名小写/'命名。 
+                'url': '/reg/changfu/',
+                'icon': 'fa fa-tasks'
+                },
+                {
+                'name': '用户关系',
+                # 注意url按'/admin/应用名小写/模型名小写/'命名。 
+                'url': '/reg/user_hierarchy/',
+                'icon': 'fa fa-tasks'
+                },
+                # {
+                # 'name': '交易查看',
+                # # 注意url按'/admin/应用名小写/模型名小写/'命名。 
+                # 'url': '/admin/app1/t_trade/',
+                # 'icon': 'fa fa-tasks'
+                # },
+            ]
+        }, 
+     ]
  }
 
 CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:5500','http://8.210.252.124','http://www.youdao.love']
@@ -349,8 +349,8 @@ CELERY_RESULT_BACKEND='redis://127.0.0.1:6379/1'
 # CELERY_RESULT_BACKEND = 'django-db'
  
 
-# Celery Configuration Options
-CELERY_TIMEZONE = "Asia/Shanghai"
+  # Celery Configuration Options
+CELERY_TIMEZONE = "Asia/Hong_Kong"
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 30 * 60
 

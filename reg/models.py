@@ -195,7 +195,7 @@ class payToken(models.Model):
     uidB = models.IntegerField(db_comment='用户B-接收方',verbose_name="用户B-接收方", blank=True, null=True,default=0) 
     status_choices=[
         (0,"未生效"),
-        (1,"返回hash"),  
+        (1,"返还"),  
         (2,"hash验证失败"), 
         (3,"hash验证成功"),      
     ]

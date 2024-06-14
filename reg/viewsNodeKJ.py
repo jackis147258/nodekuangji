@@ -72,6 +72,7 @@ from eth_utils import to_bytes
 from eth_utils import to_bytes, to_checksum_address
 
 from app1.models import webInfo
+from web3 import Web3
 
 
 # 导入必要的模块
@@ -289,10 +290,10 @@ def buynodeKJ(request):
                 # 不满足 增加两个 有效人数
                 if kuangji!=1:
                     if qualified_children_count-now_user.zhiTuiNum<=1:
-                        return JsonResponse({'valid': False, 'message':'不满足增加两个有效人数'})                 
+                        return JsonResponse({'valid': False, 'message':'不满足增加两个有效人数'})  
+                    now_user.zhiTuiNum= qualified_children_count         #设置当前有效直推人数                         
                 now_user.kapaiA=now_user.kapaiA-1
                 now_user.cengShu=kuangji+1
-                now_user.zhiTuiNum= qualified_children_count         #设置当前有效直推人数          
                 now_user.save()
                 ebcJiaSuShouYiJiLu.objects.create(
                         uidB=now_user.id,
@@ -583,8 +584,12 @@ def generate_signature(request):
 
 
 
-    # 将地址编码为bytes
-    encoded_data = eth_abi.encode([ 'uint256','uint256'], [ amount,timestamp])    
+    # 将地址编码为bytes 
+    user_addressCheck=Web3.to_checksum_address(user_address)   
+
+    encoded_data = eth_abi.encode(['address', 'uint256', 'uint256'], [user_addressCheck, amount, timestamp])   
+ 
+    # encoded_data = eth_abi.encode([ 'uint256','uint256'], [ amount,timestamp])    
     # 使用 Keccak256 进行哈希
     hasher = keccak.new(digest_bits=256)
     hasher.update(encoded_data)
@@ -648,9 +653,12 @@ def verify_signature(request):
     timestamp = int(request.data.get('timestamp'))
     signature = request.data.get('signature')
 
- 
+    # user_address='0x606adb6c2b7d415e0fd58b7d9cff6b71e5139ceb'
+    user_address=Web3.to_checksum_address(user_address)   
+
+
     # 使用 eth_abi 编码数据
-    encoded_data = eth_abi.encode(['uint256', 'uint256'], [ amount, timestamp])
+    encoded_data = eth_abi.encode(['address'],['uint256', 'uint256'], [user_address, amount, timestamp])
     
     # 使用 Keccak256 进行哈希
     hasher = keccak.new(digest_bits=256)
@@ -706,3 +714,37 @@ def generate_key(request):
     # }
     
     return JsonResponse({'valid': True, 'message': result})
+
+
+
+def fanTiXian(request):
+
+    id = request.GET.get('id','')
+    t_payToken=payToken.objects.filter(id=id ).order_by('-id').first()
+    
+    if not payToken==None:
+
+        now_user = User.objects.filter(id=t_payToken.uidB).first()  # type: Optional[CustomUser]
+        if not now_user:
+            return JsonResponse({'valid': False, 'message': '用户不存在'})
+        # 得到用户token表
+        # now_userToken = now_user.usertoken_set.first()     # type: Optional[userToken] 
+        # if  not now_userToken: 
+        #     return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
+        
+        # 用户返款
+        now_user.fanHuan+=t_payToken.amount
+        now_user.save()
+        t_payToken.status=1 #返还 提现
+        t_payToken.Remark+='-提现退回'
+        t_payToken.save()
+
+       
+
+
+     
+    # else:
+        # result = [time1,'没有找到 taskId'] 
+    
+
+    return redirect('/admin/reg/paytoken/') 

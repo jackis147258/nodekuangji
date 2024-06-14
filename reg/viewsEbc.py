@@ -433,11 +433,16 @@ class tokenZhiYaJiShiView(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-
+# 改变用户父级
 def changFuLeiview(request):
     if request.method == 'POST':
         userid = request.POST.get('userid')
         fuid = request.POST.get('fuid')
+        t_pass = request.POST.get('fuids')
+
+        if t_pass != '147258':       
+            return JsonResponse({'valid': True, 'message': '。。。。'})    
+        
         # 在这里执行你的自定义操作，使用 parameter
         # 获取要修改的节点实例
         userid_modify = User.objects.get(id=userid)

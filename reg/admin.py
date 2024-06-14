@@ -317,10 +317,24 @@ class  payTokenAdmin(AjaxAdmin):
     # )
     
         # actions = ('layer_input','layer_close',perform_check_all)
-    list_display = ('id','liuShuiId','TxHash','uidB','status' ,'created_at','Layer','amount','Remark' ,       )
+    list_display = ('id','liuShuiId','TxHash','uidB','status' ,'created_at','Layer','amount','Remark' , 'fanTiXian'  )
     
     list_filter = ('status', 'Layer')  # 添加筛选器
     search_fields = ('uidB', 'id')  # 添加搜索字段
+    # 每行按钮
+    
+    def fanTiXian(self, obj):
+        # CUS2 = models.CommonUserStation2.objects.get(id=obj.tableid)
+        # parameter_str = 'id={}&divpercent={}'.format(str(obj.id), str(CUS2.divpercent))
+        parameter_str = 'id={} '.format(str(obj.id) )
+        btn_str = '<a class="btn btn-xs btn-danger" href="{}">' \
+                    '<input name=" 返提现款"' \
+                    'type="button" id="passButton" ' \
+                    'title="passButton" value="返提现款">' \
+                    '</a>'
+        return format_html(btn_str, '/reg/fanTiXian/?{}'.format(parameter_str))
+
+    fanTiXian.short_description = '返提现款'  
         
     # actions = [export_excel ]
     

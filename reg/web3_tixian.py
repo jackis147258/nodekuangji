@@ -20,7 +20,11 @@ redis_client = redis.StrictRedis(host='localhost', port=6379, db=3)
 
 class Web3TiXian:
     def __init__(self):
-        pancakeRouterAddress = config('EbcState_ADDRESS', default='')
+        # 0x9E5993a7D9af815216810680e0a319491C263B46
+        # pancakeRouterAddress = config('EbcState_ADDRESS', default='')         
+        pancakeRouterAddress = '0x779732DC4aa3Bf415a0D1435e919BcAF5a9210E7'
+        self.EbcStateADDRESS = pancakeRouterAddress
+
         pancakeAbi = tokenAbi(pancakeRouterAddress)  # 合约 ABI 
         # 初始化 Web3 连接
         # bsc = "https://rpc.ankr.com/bsc/174ba138f2cbc5773ef292c0e0a941ec3f23246439e9f0b8d7bec242a67f8c20"  #免费
@@ -32,12 +36,14 @@ class Web3TiXian:
         self.contract = self.web3.eth.contract(address=pancakeRouterAddress, abi=pancakeAbi)
     
     def listen_Withdrawal_events(self,latest_block):
-        logger.info('获取用户提现链上获取 ...' )
-
+       
         # 从最新的 10 个区块中获取事件日志
         # latest_block = self.web3.eth.block_number
         from_block = latest_block - 20 if latest_block >= 10 else 0
         to_block = latest_block
+        logger.info('提现记录 ...区块'+str(from_block)+'to:'+str(to_block) )
+        logger.info('合约地址'+str(self.EbcStateADDRESS) )
+
 
         # 获取 Deposit 事件日志
         events = self.contract.events.Withdrawal().get_logs(fromBlock=from_block, toBlock=to_block)
@@ -52,7 +58,7 @@ class Web3TiXian:
                 'hash': event['args']['hash'],
             }
             event_list.append(event_data)
-            logger.info('得到用户提现链上信息'+str(event_data['user'])+ str(event_data['amount']) )
+            logger.info('提现链上信息'+str(event_data['user'])+ str(event_data['amount']) )
         
         return event_list
 
@@ -66,7 +72,7 @@ def format_token_amount(raw_amount, decimals=18):
 
 def process_Withdrawal_event(event_list):
     # Process the event (e.g., save to database, perform some action)
-    logger.info('获取用户提现记录'+'开始...' )
+    logger.info('提现记录'+'开始...' )
     for event_data in event_list:
         try:
             with transaction.atomic():
@@ -130,14 +136,14 @@ def process_Withdrawal_event(event_list):
                 #     cTime=event_data['time'], 
                 #     Remark=str(t_user.id)+t_Remark+':'+str(event_data['hash']),
                 # )
-                logger.info('用户'+str(t_user.id)+t_Remark+str(amount10) )
+                logger.info('提现：'+str(t_user.id)+t_Remark+str(amount10) )
         except Exception as e:
                     # 处理异常
                     result = ["Failed-tiXian", f"ERROR: {e}"]
                     print(result)
                     logger.info(result)
                     return result
-    logger.info('获取用户提现记录结束' )
+    logger.info('提现记录结束' )
 
     # Add your processing logic here
 
@@ -152,6 +158,11 @@ def listen_to_Withdrawal_events():
         latest_block = redis_client.get('tiXianLatest_block')  
       
     web3_client = Web3TiXian()
+
+    now_block = web3_client.web3.eth.block_number
+    if int(latest_block)>int(now_block):
+        latest_block=now_block
+
     event_list = web3_client.listen_Withdrawal_events(int(latest_block))
     
     process_Withdrawal_event(event_list)

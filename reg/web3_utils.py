@@ -20,7 +20,11 @@ redis_client = redis.StrictRedis(host='localhost', port=6379, db=3)
 
 class Web3Client:
     def __init__(self):
-        pancakeRouterAddress = config('EbcState_ADDRESS', default='')
+        # 0x947d6a46FAAe7a198d75e50370BC67B501e6AeD8
+        pancakeRouterAddress = '0x947d6a46FAAe7a198d75e50370BC67B501e6AeD8'
+        # pancakeRouterAddress = config('EbcState_ADDRESS', default='')
+
+        self.EbcStateADDRESS = pancakeRouterAddress
         pancakeAbi = tokenAbi(pancakeRouterAddress)  # 合约 ABI 
         # 初始化 Web3 连接
         # bsc = "https://rpc.ankr.com/bsc/174ba138f2cbc5773ef292c0e0a941ec3f23246439e9f0b8d7bec242a67f8c20"  #免费
@@ -40,6 +44,9 @@ class Web3Client:
 
         from_block = latest_block - 20 if latest_block >= 10 else 0
         to_block = latest_block
+        logger.info('充值记录 ...区块'+str(from_block)+'to:'+str(to_block))
+        logger.info('合约地址'+str(self.EbcStateADDRESS) )
+
 
         # 获取 Deposit 事件日志
         events = self.contract.events.Deposit().get_logs(fromBlock=from_block, toBlock=to_block)

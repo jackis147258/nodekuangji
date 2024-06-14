@@ -26,6 +26,7 @@ urlpatterns = [
     path('ebcusertuichu/', viewsEbc.ebcUserTuiChuView, name='ebcUserTuichu'),
     
     path('ebctest/', viewsEbc.ebcTest, name='ebcTest'),
+    # 改变父类
     path('changfu/', viewsEbc.changFuLeiview, name='changfu'),
     
     # 注册新用户 返回 用户信息， 创建userToken
@@ -45,6 +46,9 @@ urlpatterns = [
     path('signature/', viewsNodeKJ.generate_signature, name='signature'),
     path('generate_key/', viewsNodeKJ.generate_key, name='generate_key'),
     path('verify_signature/', viewsNodeKJ.verify_signature, name='verify_signature'),
+
+    path('fanTiXian/', viewsNodeKJ.fanTiXian, name='verify_signature'),
+
 
 
     

@@ -361,7 +361,7 @@ class T_TokenAddr(models.Model):
     
 
     uid = models.ForeignKey(User,on_delete=models.CASCADE)
-    last_used = models.DateTimeField(auto_now=True)
+    last_used = models.DateTimeField(blank=True, null=True,auto_now=True)
 
 
     BuyNumber= models.IntegerField(verbose_name="购买数量",blank=True, null=True,default=0,db_comment='购买数量')  
@@ -401,7 +401,7 @@ class T_TokenAddrBak(models.Model):
     
 
     uid = models.ForeignKey(User,on_delete=models.CASCADE)
-    last_used = models.DateTimeField(auto_now=True)
+    last_used = models.DateTimeField(blank=True, null=True,auto_now=True)
     
     BuyNumber= models.IntegerField(verbose_name="购买数量",blank=True, null=True,default=0,db_comment='购买数量')  
     BuyTOKEN_price = models.CharField(verbose_name="购买价格",max_length=255,blank=True, null=True, db_comment='购买价格')
