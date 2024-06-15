@@ -4,8 +4,6 @@
     // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [ 
-
-
     {
         "name": "Daphne1",
         "type": "python",
@@ -14,7 +12,8 @@
         "args": [
             "-b0.0.0.0",
             // "-b127.0.0.1",
-            "-p9003",
+            // "-p9003",
+            "-p9007",
             "moon39.asgi:application"
         ],
     },

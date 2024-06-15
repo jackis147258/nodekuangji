@@ -23,7 +23,15 @@ from .ebcUserTiXian import  userTiXian ,userTiXianHash
 from django.urls import reverse
 from django.utils.html import format_html
 from . import  setTokenUsersBalance,web3_utils,web3_tixian
+from django.db import transaction
 
+
+
+from django.contrib.auth import get_user_model
+User = get_user_model()
+from typing import Optional
+
+from .nodeKjFenRun import fanTiXianTime
 # import web3_utils 
 def export_excel(modeladmin, request, queryset):
     # 创建一个 Excel 工作簿
@@ -109,10 +117,7 @@ class CustomUserAdmin(AjaxAdmin):
             int_value = int(name)    
             
             if int_value==3:
-                t_return= FenRun()
-                
-                    
-                      
+                t_return= FenRun()                      
             # 处理用户 设置 余额
             if int_value==2: 
                 setTokenUsersBalance.userBlance();
@@ -294,15 +299,15 @@ class  tokenZhiYaJiShiAdmin(AjaxAdmin):
     search_fields = ('tokenName', 'uid__username')  # 添加搜索字段
 
 
-# 菜单 支付流水
+# 菜单 提现支付流水
 @admin.register(payToken)
 class  payTokenAdmin(AjaxAdmin):
     
      # 添加按钮 显示 和关闭
     def has_add_permission(self, request):
         return False
-    def has_delete_permission(self, request, obj=None):
-        return False
+    # def has_delete_permission(self, request, obj=None):
+    #     return False
     
     fieldsets = (
         (None, {
@@ -316,13 +321,54 @@ class  payTokenAdmin(AjaxAdmin):
     #     (None, {'fields': ('parent','email')}),
     # )
     
-        # actions = ('layer_input','layer_close',perform_check_all)
+    # actions = ('layer_input','layer_close',perform_check_all)
+    # actions = ('tiXianFanHuan',)
+    actions = ('layerTokenTiXianUserAll','tiXianFanHuan',export_excel)
+
+
+
     list_display = ('id','liuShuiId','TxHash','uidB','status' ,'created_at','Layer','amount','Remark' , 'fanTiXian'  )
     
     list_filter = ('status', 'Layer')  # 添加筛选器
     search_fields = ('uidB', 'id')  # 添加搜索字段
-    # 每行按钮
+
+    def tiXianFanHuan(self, request, queryset): 
+        reMsg='导入成功:'                
+        acct=request.user 
+        data_text = request.POST.get('data')   
+        # 使用数据库事务来确保所有操作都成功完成
+        fanTiXianTime(data_text)
+             
+        # return HttpResponseRedirect('/admin/app1/t_tokenaddr/')  # 重定向到列表页面
+      
+        return JsonResponse(data={
+                'status': 'success',
+                'msg': reMsg
+            }) 
+   
+    tiXianFanHuan.short_description = '提现返还'
+    tiXianFanHuan.type = 'success'
+    tiXianFanHuan.icon = 'el-icon-s-promotion'     
+    tiXianFanHuan.layer = {
+    'tips': '提现返还',
+    'confirm_button': '确认提现返还',
+    'cancel_button': '取消',
+    'width': '50%',
+    'labelWidth': "100px",
+    'params': [
+       
+        {
+            'type': 'textarea',
+            'key': 'data',
+            'label': '数据',
+            'require': True,
+            'placeholder': '每行一个数据'
+        }
+    ]
+}
     
+
+    # 每行按钮    
     def fanTiXian(self, obj):
         # CUS2 = models.CommonUserStation2.objects.get(id=obj.tableid)
         # parameter_str = 'id={}&divpercent={}'.format(str(obj.id), str(CUS2.divpercent))
@@ -336,9 +382,7 @@ class  payTokenAdmin(AjaxAdmin):
 
     fanTiXian.short_description = '返提现款'  
         
-    # actions = [export_excel ]
-    
-    actions = ('layerTokenTiXianUserAll',export_excel)
+     
     
         # 执行提现
     def layerTokenTiXianUserAll(self, request, queryset):

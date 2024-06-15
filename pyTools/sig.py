@@ -9,7 +9,7 @@ import eth_abi
 def generate_hash(sender_address, amount, timestamp):
     # 确保地址是小写，且包含 "0x" 前缀
     sender_address = sender_address.lower()
- 
+    print(sender_address)
     t_GuiJiWallter=Web3.to_checksum_address(sender_address)   
     print(t_GuiJiWallter)
  
@@ -37,5 +37,5 @@ def generate_hash(sender_address, amount, timestamp):
     return message_hash_hex
 
 # 示例调用  0x5B38Da6a701c568545dCfcB03FcB875f56beddC4   0x606adb6c2b7d415e0fd58b7d9cff6b71e5139ceb
-message_hash_hex = generate_hash('0x5B38Da6a701c568545dCfcB03FcB875f56beddC4', 100, 1616161616)
+message_hash_hex = generate_hash('0x9e1322e3Ca57fFf1EEaDC2B30F666BbAA5595350', 100, 1616161616)
 print(message_hash_hex)

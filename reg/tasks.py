@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
  
 from .web3_utils import Web3Client,listen_to_deposit_events
 from .web3_tixian import listen_to_Withdrawal_events
-
+from .nodeKjFenRun import fanTiXianTime
 
 @shared_task
 def listen_toDeposit ():
@@ -30,6 +30,10 @@ def listen_toDeposit ():
 def listen_toWithdrawal ():
     listen_to_Withdrawal_events()
 
+# 按小时 前 反提现
+@shared_task
+def fanTiXianTimeTask (t_house):    
+    fanTiXianTime(t_house)
 
 
 # @shared_task

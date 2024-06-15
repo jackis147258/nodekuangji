@@ -1,7 +1,7 @@
 
 import asyncio
 from django.contrib.auth.models import  Group
-from .models import CustomUser,ebcJiaSuShouYiJiLu,tokenZhiYaJiShi,userToken
+from .models import CustomUser,ebcJiaSuShouYiJiLu,tokenZhiYaJiShi,userToken,payToken
 from decimal import Decimal
 from itertools import islice
 from django.utils import timezone
@@ -23,6 +23,8 @@ from typing import Type
 from .  import ebcFenRun
 from typing import Optional
 from app1.models import webInfo
+from django.db.models import Q
+
 # def FenRunUser(userName):
 #     tokenZhiYaList=tokenZhiYaJiShi.objects.filter(status=0,tokenName=config('TOKEN_NAME2', default=''),uid=userName)
 #     for tokenZhiYa in tokenZhiYaList:  
@@ -352,7 +354,48 @@ def tuanDuiRenShu(username):
     except Exception as e:  
             # self.buyTokensBuildTransaction() # 下一次购买准备
             result = ["Failed-everybadyFan", f"ERROR: {e}"]
-            print(result)            
+            print(result)
+            logger.info(result)        
+            
             return False , result
             # self.getLpPrice()   
-     
+    
+
+# 按时间段 
+def fanTiXianTime(t_time):
+
+    try:
+    #    with transaction.atomic(): 
+        specified_time = timezone.now() - timezone.timedelta(hours=int(t_time))  # 例如，1小时  days 是一天
+            # 查询符合条件的 payToken 记录
+        pay_tokens = payToken.objects.filter(
+            Q(created_at__lt=specified_time) & Q(status=0)
+        ).order_by('-created_at')
+        logger.info('反提现开始...' )        
+
+
+        # 对符合条件的记录进行处理
+        for t_payToken in pay_tokens:
+            # call_another_method(token)  # 调用指定的方法
+            now_user = User.objects.filter(id=t_payToken.uidB).first()  # type: Optional[CustomUser]
+            if not now_user:
+                return JsonResponse({'valid': False, 'message': '用户不存在'})
+            # 得到用户token表
+            # now_userToken = now_user.usertoken_set.first()     # type: Optional[userToken] 
+            # if  not now_userToken: 
+            #     return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
+            
+            # 用户返款
+            now_user.fanHuan+=t_payToken.amount
+            now_user.save()
+            t_payToken.status=1 #返还 提现
+            t_payToken.Remark+='-提现退回'
+            t_payToken.save() 
+            logger.info('反提现'+str(now_user.id)+' name:' +now_user.username+'amount:'+str(t_payToken.amount))        
+
+    except Exception as e:  
+        # self.buyTokensBuildTransaction() # 下一次购买准备
+        result = ["Failed-fanTiXianTime", f"ERROR: {e}"]
+        print(result)          
+        logger.info(result)          
+        return False , result

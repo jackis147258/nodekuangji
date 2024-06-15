@@ -73,7 +73,7 @@ from eth_utils import to_bytes, to_checksum_address
 
 from app1.models import webInfo
 from web3 import Web3
-
+from django.db.models import Q
 
 # 导入必要的模块
 
@@ -289,8 +289,11 @@ def buynodeKJ(request):
                 qualified_children_count = now_user.get_children().filter(cengShu__gte=2).count()
                 # 不满足 增加两个 有效人数
                 if kuangji!=1:
-                    if qualified_children_count-now_user.zhiTuiNum<=1:
-                        return JsonResponse({'valid': False, 'message':'不满足增加两个有效人数'})  
+                    # list1 = ['0x9e1322e3ca57fff1eeadc2b30f666bbaa5595350','0x606adb6c2b7d415e0fd58b7d9cff6b71e5139ceb'  ]
+                    list1 = ['',''  ]
+                    if now_user.username not in list1:
+                        if qualified_children_count-now_user.zhiTuiNum<=1:
+                            return JsonResponse({'valid': False, 'message':'不满足增加两个有效人数'})  
                     now_user.zhiTuiNum= qualified_children_count         #设置当前有效直推人数                         
                 now_user.kapaiA=now_user.kapaiA-1
                 now_user.cengShu=kuangji+1
@@ -718,12 +721,9 @@ def generate_key(request):
 
 
 def fanTiXian(request):
-
     id = request.GET.get('id','')
-    t_payToken=payToken.objects.filter(id=id ).order_by('-id').first()
-    
+    t_payToken=payToken.objects.filter(id=id ).order_by('-id').first()    
     if not payToken==None:
-
         now_user = User.objects.filter(id=t_payToken.uidB).first()  # type: Optional[CustomUser]
         if not now_user:
             return JsonResponse({'valid': False, 'message': '用户不存在'})
@@ -738,13 +738,4 @@ def fanTiXian(request):
         t_payToken.status=1 #返还 提现
         t_payToken.Remark+='-提现退回'
         t_payToken.save()
-
-       
-
-
-     
-    # else:
-        # result = [time1,'没有找到 taskId'] 
-    
-
     return redirect('/admin/reg/paytoken/') 
