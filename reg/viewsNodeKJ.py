@@ -290,7 +290,7 @@ def buynodeKJ(request):
                 # 不满足 增加两个 有效人数
                 if kuangji!=1:
                     # list1 = ['0x9e1322e3ca57fff1eeadc2b30f666bbaa5595350','0x606adb6c2b7d415e0fd58b7d9cff6b71e5139ceb'  ]
-                    list1 = ['',''  ]
+                    list1 = [' ',''  ]
                     if now_user.username not in list1:
                         if qualified_children_count-now_user.zhiTuiNum<=1:
                             return JsonResponse({'valid': False, 'message':'不满足增加两个有效人数'})  

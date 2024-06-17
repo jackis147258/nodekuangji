@@ -371,7 +371,7 @@ def fanTiXianTime(t_time):
         pay_tokens = payToken.objects.filter(
             Q(created_at__lt=specified_time) & Q(status=0)
         ).order_by('-created_at')
-        logger.info('反提现开始...' )        
+        logger.info('反提现开始...' +str(t_time) )        
 
 
         # 对符合条件的记录进行处理

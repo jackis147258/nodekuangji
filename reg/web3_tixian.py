@@ -90,6 +90,7 @@ def process_Withdrawal_event(event_list):
                 # 表示已经处理过流水
                 if payTokenObj: 
                     payTokenObj.status=3 #验证 成功  
+                    payTokenObj.Remark+="验证成功"
                     payTokenObj.save()
 
                     logger.info('该笔流水已处理 id:'+str(hex_string) +' 用户:'+str(event_data['user']) )
