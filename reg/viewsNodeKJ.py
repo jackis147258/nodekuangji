@@ -176,6 +176,15 @@ jiantui_fenghong = {
     4: 0.018,
     5: 0.02,
 }
+# 奖金池 楼层对应->分红比例
+jiangJinChi_fenghong = {
+    5: 0.1,
+    10: 0.2,
+    15: 0.3,
+    20: 0.4,
+    25: 0.6,
+    # 30: 0.02,
+}
 
 # 楼层高度需要注意
 lou_ceng_gao_du = {
@@ -271,6 +280,7 @@ def buynodeKJ(request):
     if now_userToken.jzToken<nodes_arr_siyang_payment['nodeKJ'+str(kuangji)]:
         return JsonResponse({'valid': False, 'message':'用户余额不足'}) 
     # 
+
    
     try:
         with transaction.atomic():
@@ -287,10 +297,11 @@ def buynodeKJ(request):
                     return JsonResponse({'valid': False, 'message': '燃料包不够'})
                 # 直接在数据库层面进行过滤和计数
                 qualified_children_count = now_user.get_children().filter(cengShu__gte=2).count()
+                # qualified_children_count = now_user.get_children().count()
                 # 不满足 增加两个 有效人数
                 if kuangji!=1:
                     # list1 = ['0x9e1322e3ca57fff1eeadc2b30f666bbaa5595350','0x606adb6c2b7d415e0fd58b7d9cff6b71e5139ceb'  ]
-                    list1 = [' ',''  ]
+                    list1 = ['',''  ]
                     if now_user.username not in list1:
                         if qualified_children_count-now_user.zhiTuiNum<=1:
                             return JsonResponse({'valid': False, 'message':'不满足增加两个有效人数'})  
@@ -307,9 +318,34 @@ def buynodeKJ(request):
                         Remark='扣除燃料包1张'        )
                 logger.info('扣除燃料包1张:'+now_user.username )   
         
+          
+            # 得到 10% 奖金池
+            t_jj10=0
+            isjj=False
+            if kuangji in [5, 10, 15, 20, 25]:
+                now_webid = webInfo.objects.filter(webid=3).first()
+                t_jj10=now_webid.jiangJinChi*(jiangJinChi_fenghong[kuangji])
+                now_webid.jiangJinChi-=t_jj10
+                now_webid.save()    
+                isjj=True
             #扣除用户jz
             now_userToken.jzToken=now_userToken.jzToken-nodes_arr_siyang_payment['nodeKJ'+str(kuangji)]
+            # 增加奖金池奖金
+            now_userToken.jzToken+=t_jj10                 
             now_userToken.save()
+            # 需要处理 奖金日志
+            if isjj:
+                # 写入记录 得到 10% 奖金池
+                ebcJiaSuShouYiJiLu.objects.create(
+                    uidB=now_user.id,
+                    status=1,
+                    fanHuan=t_jj10,
+                    cTime=int(timezone.now().timestamp()),#质押更新时间
+                    # liuShuiId=int(value[4][i]),
+                    Layer=11, #得到奖金池 
+                    Remark='奖金池奖励:'+str(t_jj10)+' :'+str(int(jiangJinChi_fenghong[kuangji]*100))+'%'  #+config('TOKEN_NAME2', default='') 
+                )
+
 
             # 记录质押矿机 信息
             new_tokenZhiYaJiShi =tokenZhiYaJiShi.objects.create(
@@ -324,7 +360,7 @@ def buynodeKJ(request):
                 zhiYaTime=int(timedelta(days=365).total_seconds())   ,     #质押时间
                 kaiShiTime=int(timezone.now().timestamp()),#质押开始时间
                 uTime=int(timezone.now().timestamp()),#质押更新时间
-                Remark=str(now_user.id)+'质押矿机'
+                Remark=str(now_user.id)+'质押矿机,直推人数:'+str(qualified_children_count)
             )
         
         # 写入记录
@@ -337,6 +373,8 @@ def buynodeKJ(request):
                 Layer=0, #质押矿机 
                 Remark='质押:'+str(kuangji)+'号矿机'  #+config('TOKEN_NAME2', default='') 
             )
+          
+      
         logger.info('成功质押矿机:'+str(now_user.username) )
         # 处理分润
         # nodeKjFenRun.FenRunUser(now_user)
@@ -568,82 +606,85 @@ def generate_signature(request):
     except ValueError:
         return JsonResponse({'valid': False, 'message': 'Amount 必须为 integer'})
 
-    now_user = User.objects.filter(username=user_address).first()  
-    if not now_user:
-        return JsonResponse({'valid': False, 'message': '用户不存在'})
-      # 得到用户token表
-    now_userToken = now_user.usertoken_set.first()     # type: Optional[userToken] 
-    if  not now_userToken: 
-        return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
+
+    try:
+
+        now_user = User.objects.filter(username=user_address).first()  
+        if not now_user:
+            return JsonResponse({'valid': False, 'message': '用户不存在'})
+        # 得到用户token表
+        now_userToken = now_user.usertoken_set.first()     # type: Optional[userToken] 
+        if  not now_userToken: 
+            return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
+        
+
+        # amount10 = float(amount) / (10 ** 18)
+        # if amount10 > now_userToken.jzToken:
+        #     return JsonResponse({'valid': False, 'message': '余额不足'}) 
+
+        amount10 = float(amount) / (10 ** 18)
+        if amount10 > float(now_user.fanHuan):
+            return JsonResponse({'valid': False, 'message': '可返还余额不足'}) 
+
+
+
+        # 将地址编码为bytes 
+        user_addressCheck=Web3.to_checksum_address(user_address)   
+
+        encoded_data = eth_abi.encode(['address', 'uint256', 'uint256'], [user_addressCheck, amount, timestamp])   
     
+        # encoded_data = eth_abi.encode([ 'uint256','uint256'], [ amount,timestamp])    
+        # 使用 Keccak256 进行哈希
+        hasher = keccak.new(digest_bits=256)
+        hasher.update(encoded_data)
+        message_hash = hasher.digest()
+        message_hash_hex = message_hash.hex() 
+        print(f"Python 生成的 message_hash: {message_hash_hex}")
+        # 使用生成的私钥
+        private_key = '0x9ba61124ddeb2c0c444ac5b643833bf24421d97eed3c9ede44a771319054bc9d'
+        signed_message = Account.sign_message(encode_defunct(hexstr=message_hash_hex), private_key)
 
-    # amount10 = float(amount) / (10 ** 18)
-    # if amount10 > now_userToken.jzToken:
-    #     return JsonResponse({'valid': False, 'message': '余额不足'}) 
+        signature = signed_message.signature.hex()
 
-    amount10 = float(amount) / (10 ** 18)
-    if amount10 > float(now_user.fanHuan):
-        return JsonResponse({'valid': False, 'message': '可返还余额不足'}) 
-
-
-
-    # 将地址编码为bytes 
-    user_addressCheck=Web3.to_checksum_address(user_address)   
-
-    encoded_data = eth_abi.encode(['address', 'uint256', 'uint256'], [user_addressCheck, amount, timestamp])   
- 
-    # encoded_data = eth_abi.encode([ 'uint256','uint256'], [ amount,timestamp])    
-    # 使用 Keccak256 进行哈希
-    hasher = keccak.new(digest_bits=256)
-    hasher.update(encoded_data)
-    message_hash = hasher.digest()
-    message_hash_hex = message_hash.hex() 
-    print(f"Python 生成的 message_hash: {message_hash_hex}")
-     # 使用生成的私钥
-    private_key = '0x9ba61124ddeb2c0c444ac5b643833bf24421d97eed3c9ede44a771319054bc9d'
-    signed_message = Account.sign_message(encode_defunct(hexstr=message_hash_hex), private_key)
-
-    signature = signed_message.signature.hex()
-
-
- 
-
-
-    # 写入记录     
-    t_payToken=payToken ()
-    # t_payToken.uidA=t_user   #发送方
-    t_payToken.uidB=now_user.id  # 接收方
-    t_payToken.status=0  # 
-    t_payToken.Layer=0        
-    t_payToken.amount=amount10
-    t_payToken.tiXianWallter=user_address
-    t_payToken.HashId=message_hash_hex
-    t_payToken.Remark='用户提现'    
-    t_payToken.save()  
-    # 扣费
-    now_user.fanHuan-=amount10
-    now_user.save()
-    # now_userToken.jzToken-=amount10
-    # now_userToken.save()
-    # 10% 记录到 奖金池
-      # 计入奖金池
-    now_webid = webInfo.objects.filter(webid=3).first()     
-
-    
-    now_webid.jiangJinChi=now_webid.jiangJinChi+(amount10*0.1)
-    now_webid.save()
 
     
 
-    result = {
-        'signature': signature,
-        'timestamp': timestamp,
-        'hash': message_hash_hex
-    }
 
+        # 写入记录     
+        t_payToken=payToken ()
+        # t_payToken.uidA=t_user   #发送方
+        t_payToken.uidB=now_user.id  # 接收方
+        t_payToken.status=0  # 
+        t_payToken.Layer=0        
+        t_payToken.amount=amount10
+        t_payToken.tiXianWallter=user_address
+        t_payToken.HashId=message_hash_hex
+        t_payToken.Remark='用户提现'    
+        t_payToken.save()  
+        # 扣费
+        now_user.fanHuan-=amount10
+        now_user.save()
+        # now_userToken.jzToken-=amount10
+        # now_userToken.save()
+        # 10% 记录到 奖金池
+        # 计入奖金池
+        now_webid = webInfo.objects.filter(webid=3).first()     
 
-    
-    return JsonResponse({'valid': True, 'message': result})
+        
+        now_webid.jiangJinChi=now_webid.jiangJinChi+(amount10*0.1)
+        now_webid.save()
+
+        result = {
+            'signature': signature,
+            'timestamp': timestamp,
+            'hash': message_hash_hex
+        }        
+        return JsonResponse({'valid': True, 'message': result})
+    except Exception as e:
+        # 处理异常
+        result = ["Failed-everybadyFan", f"ERROR: {e}"]      
+        logger.info(result)
+        return JsonResponse({'valid': False, 'message': result})  
 
 
 

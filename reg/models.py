@@ -104,7 +104,7 @@ class ebcJiaSuShouYiJiLu(models.Model):
     fanHuan= models.FloatField(db_comment='每次返还额度',verbose_name="每次返还额度", blank=True, null=True,default=0)
     liuShuiId = models.IntegerField(db_comment='流水ID 合约同步',blank=True, null=True,default=0) 
     Remark = models.CharField(verbose_name="备注",max_length=255,blank=True, null=True, db_comment='task备注')
-    Layer = models.IntegerField(verbose_name="类型",db_comment='0充值 1 代数 2 层数 3 #提现到账 日志 4.购买燃料包  ',blank=True, null=True,default=0)
+    Layer = models.IntegerField(verbose_name="类型",db_comment='0充值 1 代数 2 层数 3 #提现到账 日志 4.购买燃料包  11.得到奖金池',blank=True, null=True,default=0)
     tokenZhiYaJiShiId = models.IntegerField(db_comment='质押表ID',blank=True, null=True,default=0) 
 
     cTime = models.BigIntegerField(db_comment='操作时间',blank=True, null=True,default=0)   

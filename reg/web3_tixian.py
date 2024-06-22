@@ -20,9 +20,9 @@ redis_client = redis.StrictRedis(host='localhost', port=6379, db=3)
 
 class Web3TiXian:
     def __init__(self):
-        # 0x9E5993a7D9af815216810680e0a319491C263B46
+        # 0x9E5993a7D9af815216810680e0a319491C263B46   0x779732DC4aa3Bf415a0D1435e919BcAF5a9210E7
         # pancakeRouterAddress = config('EbcState_ADDRESS', default='')         
-        pancakeRouterAddress = '0x779732DC4aa3Bf415a0D1435e919BcAF5a9210E7'
+        pancakeRouterAddress = '0x07B7C7f2b51232CAcF9Db466aF90ec1826CA7a86'
         self.EbcStateADDRESS = pancakeRouterAddress
 
         pancakeAbi = tokenAbi(pancakeRouterAddress)  # 合约 ABI 
@@ -88,7 +88,7 @@ def process_Withdrawal_event(event_list):
                 
                 payTokenObj=payToken.objects.filter(HashId=hex_string).first()
                 # 表示已经处理过流水
-                if payTokenObj: 
+                if payTokenObj and payTokenObj.status!=3: 
                     payTokenObj.status=3 #验证 成功  
                     payTokenObj.Remark+="验证成功"
                     payTokenObj.save()
