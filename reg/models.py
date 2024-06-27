@@ -146,6 +146,17 @@ class tokenZhiYaJiShi(models.Model):
     amount= models.FloatField(db_comment='质押额度',verbose_name="质押额度",  blank=True, null=True)
     amountType = models.CharField(verbose_name="质押类型",max_length=255,blank=True, null=True, db_comment='质押类型')
 
+    amountShouYi= models.FloatField(db_comment='质押收益',verbose_name="质押收益",  blank=True, null=True)
+
+    @staticmethod
+    def get_kuangjiList_by_uid(t_user):
+        # 过滤 uid 等于 parent_user 且 status 等于 1 的记录
+        t_kuangji = tokenZhiYaJiShi.objects.filter(uid=t_user, status=1).first()
+        if t_kuangji:
+            return t_kuangji
+        return None
+
+
 
 
     class Meta:      

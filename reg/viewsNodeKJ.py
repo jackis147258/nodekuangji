@@ -256,6 +256,90 @@ lou_ceng_tu_di = {
 }
 
 
+
+# 停止矿机激活
+#1 根据矿机类型 扣款 2/.购买矿机，保存数据库
+@api_view(["POST"])
+def buynodeKJStart(request): 
+    t_username = request.data.get('username')   
+    kuangji = int(request.data.get('kuangji'))     
+    now_user = User.objects.filter(username=t_username).first()  # type: Optional[CustomUser] 
+    if not now_user:
+        return JsonResponse({'valid': False, 'message': '用户不存在'})
+      # 得到用户token表
+    now_userToken = now_user.usertoken_set.first()     # type: Optional[userToken] 
+    if  not now_userToken: 
+        return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
+    #矿机  
+    nowKuangji = tokenZhiYaJiShi.objects.filter(id=kuangji).first()
+    if  nowKuangji==None:
+        # return JsonResponse({'message': '记录已存在', 'status': 'exists'})
+        return JsonResponse({'valid': False, 'message': '号矿机不存在'}) 
+   
+    #购买n矿机 余额是否足够
+    if now_userToken.jzToken<nodes_arr_siyang_payment['nodeKJ'+str(kuangji)]:
+        return JsonResponse({'valid': False, 'message':'用户余额不足'}) 
+    # 
+   
+    try:
+        with transaction.atomic():
+            #扣除用户燃料包
+            # if kuangji != 0:   
+            if True:   
+                # 扣除卡牌
+                if now_user.kapaiA<1:
+                    return JsonResponse({'valid': False, 'message': '燃料包不够'})
+                # # 直接在数据库层面进行过滤和计数
+                # qualified_children_count = now_user.get_children().filter(cengShu__gte=2).count()
+                # # 不满足 增加两个 有效人数
+                # if kuangji!=1:
+                #     list1 = ['',''  ]
+                #     if now_user.username not in list1:
+                #         if qualified_children_count-now_user.zhiTuiNum<=1:
+                #             return JsonResponse({'valid': False, 'message':'不满足增加两个有效人数'})  
+                #     now_user.zhiTuiNum= qualified_children_count         #设置当前有效直推人数                         
+                now_user.kapaiA=now_user.kapaiA-1                
+                now_user.save()
+                ebcJiaSuShouYiJiLu.objects.create(
+                        uidB=now_user.id,
+                        status=1,  
+                        fanHuan=1,
+                        # liuShuiId=int(value[4][i]),
+                        Layer=0, #0代币 充值
+                        Remark='扣除燃料包1张'        )
+                logger.info('扣除燃料包1张:'+now_user.username ) 
+            #扣除用户jz
+            now_userToken.jzToken=now_userToken.jzToken-nodes_arr_siyang_payment['nodeKJ'+str(kuangji)]                   
+            now_userToken.save()
+
+            # 记录质押矿机 信息
+            nowKuangji.status=0  #启动矿机
+            nowKuangji.amountShouYi=0 #收益归零重新计算
+            nowKuangji.save()
+        
+        # 写入记录
+            ebcJiaSuShouYiJiLu.objects.create(
+                uidB=now_user.id,
+                status=1,
+                fanHuan=nodes_arr_siyang_payment['nodeKJ'+str(kuangji)],
+                cTime=int(timezone.now().timestamp()),#质押更新时间
+                # liuShuiId=int(value[4][i]),
+                Layer=0, #质押矿机 
+                Remark='重新启动质押:'+str(kuangji)+'号矿机'  #+config('TOKEN_NAME2', default='') 
+            )      
+        logger.info('成功重新启动质押:'+str(now_user.username) )
+        # 处理分润
+        # nodeKjFenRun.FenRunUser(now_user)
+
+        return JsonResponse({'valid': True, 'message': '重新启动质押成功' })
+    except Exception as e:
+        # 处理异常
+        result = ["Failed-everybadyFan", f"ERROR: {e}"]
+        print(result)
+        logger.info(result)
+        return result 
+
+
 # 购买矿机处理
 #1 根据矿机类型 扣款 2/.购买矿机，保存数据库
 @api_view(["POST"])
@@ -464,7 +548,7 @@ class userTokenZhiYaJiShiListView(viewsets.ModelViewSet):
     queryset = tokenZhiYaJiShi.objects.all() 
     serializer_class = tokenZhiYaJiShiSerializer
     # lookup_field = 'uidB'  # 设置使用 username 字段来查找对象 
-    
+    # 已经质押矿机列表
     @action(detail=False, methods=['get'] )
     def listkj(self, request):
         # 获取查询参数          zztoken = request.data.get('zztoken')   request.query_params.get('userid', None)
@@ -472,27 +556,19 @@ class userTokenZhiYaJiShiListView(viewsets.ModelViewSet):
         userid_param = request.query_params.get('userid', None)
         # layer_param = request.query_params.get('layer', None)
         # status_param = request.query_params.get('status', None)
-
-        
-
         # 构造过滤条件
         filter_conditions = {}
         if userid_param is not None:
             filter_conditions['uid'] = userid_param
             filter_conditions['Layer'] = 0 #0 代表质押的是矿机
             filter_conditions['status'] = 0 #0 代表质押中 1 以释放
-
         else:
-            return Response("用户名为空")
-            
+            return Response("用户名为空")            
         # if layer_param is not None:
         #     filter_conditions['Layer'] = 0 #0 代表质押的是矿机
 
         # if layer_param is not None:
-        #     filter_conditions['Layer'] = 0 #0 代表质押的是矿机
-        
-     
-
+        #     filter_conditions['Layer'] = 0 #0 代表质押的是矿机    
         # 如果有查询参数，根据条件过滤数据
         if filter_conditions:
             queryset = tokenZhiYaJiShi.objects.filter(**filter_conditions).order_by('-id')
@@ -503,6 +579,39 @@ class userTokenZhiYaJiShiListView(viewsets.ModelViewSet):
         # 序列化数据
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
+    
+     # 已经停止质押矿机列表
+    @action(detail=False, methods=['get'] )
+    def listkjStop(self, request):
+        # 获取查询参数          zztoken = request.data.get('zztoken')   request.query_params.get('userid', None)
+
+        userid_param = request.query_params.get('userid', None)
+        # layer_param = request.query_params.get('layer', None)
+        # status_param = request.query_params.get('status', None)
+        # 构造过滤条件
+        filter_conditions = {}
+        if userid_param is not None:
+            filter_conditions['uid'] = userid_param
+            filter_conditions['Layer'] = 0 #0 代表质押的是矿机
+            filter_conditions['status'] = 1 #0 代表质押中 1 以释放
+        else:
+            return Response("用户名为空")            
+        # if layer_param is not None:
+        #     filter_conditions['Layer'] = 0 #0 代表质押的是矿机
+
+        # if layer_param is not None:
+        #     filter_conditions['Layer'] = 0 #0 代表质押的是矿机    
+        # 如果有查询参数，根据条件过滤数据
+        if filter_conditions:
+            queryset = tokenZhiYaJiShi.objects.filter(**filter_conditions).order_by('-id')
+        else:
+            # 如果没有查询参数，返回全部数据
+            queryset = tokenZhiYaJiShi.objects.all()
+
+        # 序列化数据
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
+    
     
 
 
@@ -535,20 +644,30 @@ def getKJDayFanHuan(request):
     if t_kuangJi.uTime > current_timestamp   : #时间小于当前时间 已经领取
         return JsonResponse({'valid': False, 'message': '当日已领取'}) 
     
+    # 返利超过2倍 矿机停止
+    if t_kuangJi.amountShouYi > t_kuangJi.amount*2 :
+        t_kuangJi.status=1  #1已释放
+        t_kuangJi.amountShouYi+=t_liRun
+        t_kuangJi.save()
+        return JsonResponse({'valid': False, 'message': '矿机质押到期请重新质押'}) 
+    
 
-    if t_kuangJi and t_kuangJi.status == 0 :   # 1 表示 质押状态
+    if t_kuangJi and t_kuangJi.status == 0 :   # 0 质押中,1已释放
         # isF,t_re=nodeKjFenRun.everybadyFan(t_kuangJi)
         # 矿机 当天收益时间 加一天， 用户得到当日收益 并保存
+
+         # 矿机质押 * 对应利润
+        t_liRun=t_kuangJi.amount * nodes_att_daily_rate['nodeKJ'+str(t_kuangJi.nodeKjCode)]/100
 
      
         one_day_timestamp = 24 * 60 * 60
         print(one_day_timestamp)
         # t_jiasu15=0
         t_kuangJi.uTime=t_kuangJi.uTime+int(one_day_timestamp)
+        t_kuangJi.amountShouYi+=t_liRun
         t_kuangJi.save()
 
-        # 矿机质押 * 对应利润
-        t_liRun=t_kuangJi.amount * nodes_att_daily_rate['nodeKJ'+str(t_kuangJi.nodeKjCode)]/100
+       
         # now_userToken.jzToken+=t_liRun
         # now_userToken.save()
 

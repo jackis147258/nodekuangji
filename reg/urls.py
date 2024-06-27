@@ -40,6 +40,7 @@ urlpatterns = [
     path('ebctixianmatic/', viewsEbc.ebcTiXianMatic, name='ebcTiXianMatic'),
     # 节点矿机
     path('buynodeKJ/', viewsNodeKJ.buynodeKJ, name='buynodeKJ'),
+
     path('buyRanLiaoBao/', viewsNodeKJ.buyRanLiaoBao, name='buyRanLiaoBao'),
 
     path('getKJDayFanHuan/', viewsNodeKJ.getKJDayFanHuan, name='getKJDayFanHuan'),
@@ -48,6 +49,9 @@ urlpatterns = [
     path('verify_signature/', viewsNodeKJ.verify_signature, name='verify_signature'),
 
     path('fanTiXian/', viewsNodeKJ.fanTiXian, name='verify_signature'),
+
+    path('buynodeKJStart/', viewsNodeKJ.buynodeKJStart, name='buynodeKJStart'),
+
 
 
 
@@ -71,5 +75,7 @@ router.register(r'paytoken', viewsEbc.ebcPayTokenView)
 
 #节点矿机用户质押列表
 router.register(r'userkjlist',viewsNodeKJ.userTokenZhiYaJiShiListView)
+#节点矿机用户质押列表
+# router.register(r'userkjlistStop',viewsNodeKJ.userTokenZhiYaJiShiListView)
 # router.register(r'CustomUserListCreateView', viewsEbc.CustomUserListCreateView)
 urlpatterns += router.urls

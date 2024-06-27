@@ -99,6 +99,17 @@ def userFenRun(t_user,amount,layer,Percent):  # amount 分润基数  layer 类�
                 continue
             t_best=parentUser.cengShu
 
+            # 判断用户根据矿机个数是否可以得到反润级数
+            if t_best-1 <=i :
+                logger.info('用户id:'+str(t_parent_id) +t_user.username+'反润级别超过用户矿机级别' )
+                continue
+            # 如果矿机有停运状态 不能那反润
+            if tokenZhiYaJiShi.get_kuangjiList_by_uid(parentUser) != None:
+                logger.info('用户id:'+str(t_parent_id) +t_user.username+'有矿机停止质押,请重新质押' )
+
+
+
+
             children_count = parentUser.get_children().count()  
             # 看是否满足返还条件
             if isFanDai(i,children_count):                 
