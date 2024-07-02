@@ -82,6 +82,8 @@ class CustomUserAdmin(AjaxAdmin):
     list_filter = ('status',  )  # 添加筛选器
     # search_fields = ('username', 'id', 'userStakesA', 'userStakesB', 'userStakesBfanHuan', 'parent', 'EbcCreated_at', 'EbcLastFanHuan_at', 'fanHuan')  # 添加搜索字段
     search_fields = ('username', 'id',  )  # 添加搜索字段
+    list_per_page = 300  # 设置每页显示的条目数
+
      # 添加按钮 显示 和关闭
     # def has_add_permission(self, request):
     #     return False

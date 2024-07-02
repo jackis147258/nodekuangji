@@ -75,6 +75,10 @@ from app1.models import webInfo
 from web3 import Web3
 from django.db.models import Q
 
+from .decorators import with_lang
+
+from .utils import get_message
+
 # 导入必要的模块
 
 # 矿机属性饲养周期
@@ -277,7 +281,7 @@ def buynodeKJStart(request):
         return JsonResponse({'valid': False, 'message': '号矿机不存在'}) 
    
     #购买n矿机 余额是否足够
-    if now_userToken.jzToken<nodes_arr_siyang_payment['nodeKJ'+str(kuangji)]:
+    if now_userToken.jzToken<nodes_arr_siyang_payment['nodeKJ'+str(nowKuangji.nodeKjCode)]:
         return JsonResponse({'valid': False, 'message':'用户余额不足'}) 
     # 
    
@@ -309,7 +313,7 @@ def buynodeKJStart(request):
                         Remark='扣除燃料包1张'        )
                 logger.info('扣除燃料包1张:'+now_user.username ) 
             #扣除用户jz
-            now_userToken.jzToken=now_userToken.jzToken-nodes_arr_siyang_payment['nodeKJ'+str(kuangji)]                   
+            now_userToken.jzToken=now_userToken.jzToken-nodes_arr_siyang_payment['nodeKJ'+str(nowKuangji.nodeKjCode)]                   
             now_userToken.save()
 
             # 记录质押矿机 信息
@@ -321,11 +325,11 @@ def buynodeKJStart(request):
             ebcJiaSuShouYiJiLu.objects.create(
                 uidB=now_user.id,
                 status=1,
-                fanHuan=nodes_arr_siyang_payment['nodeKJ'+str(kuangji)],
+                fanHuan=nodes_arr_siyang_payment['nodeKJ'+str(nowKuangji.nodeKjCode)],
                 cTime=int(timezone.now().timestamp()),#质押更新时间
                 # liuShuiId=int(value[4][i]),
                 Layer=0, #质押矿机 
-                Remark='重新启动质押:'+str(kuangji)+'号矿机'  #+config('TOKEN_NAME2', default='') 
+                Remark='重新启动质押:'+str(nowKuangji.nodeKjCode)+'号矿机'  #+config('TOKEN_NAME2', default='') 
             )      
         logger.info('成功重新启动质押:'+str(now_user.username) )
         # 处理分润
@@ -617,7 +621,19 @@ class userTokenZhiYaJiShiListView(viewsets.ModelViewSet):
 
 #矿机得到 当日返还
 @api_view(["POST"])
+@with_lang
+
 def getKJDayFanHuan(request):
+
+    # lang_value = request.headers.get('lang')
+    # # zh-TC ,zh-CN,en
+    # if lang_value ==None:
+    #     lang_value="zh-CN"
+
+            # 直接使用装饰器设置的 lang 值
+    lang_value = request.lang   # zh-TC ,zh-CN,en
+   
+
     
     # t_username = request.data.get('username') 
     t_kuangJiId = request.data.get('kuangJiId') 
@@ -630,13 +646,26 @@ def getKJDayFanHuan(request):
       # 得到用户token表
     now_userToken = now_user.usertoken_set.first()     # type: Optional[userToken] 
     if  not now_userToken: 
-        return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
+        # return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
+        return JsonResponse({'valid': False, 'message': get_message(lang_value, 'token_not_exist')})
+
     
 
     
     if t_kuangJi.uTime < 1704038400 or t_kuangJi.uTime is None : #时间小于 2024-1-1 日 代表还没有同步到链上时间 
          # logger.info(result)
         return JsonResponse({'valid': False, 'message': "更新时间出错，请联系网管"})
+    
+
+    if tokenZhiYaJiShi.get_kuangjiList_by_uid(now_user) != None:
+        # logger.info('用户id:'+str(t_parent_id) +t_user.username+'有矿机停止质押,请重新质押' )
+        # return JsonResponse({'valid': False, 'message': "有矿机停止质押,请重新质押"})
+        return JsonResponse({'valid': False, 'message': get_message(lang_value, 'kuangji_stop')})
+
+
+
+
+
     
         # 获取当前时间戳   1711685804
     current_timestamp = int(timezone.now().timestamp())
@@ -645,7 +674,10 @@ def getKJDayFanHuan(request):
         return JsonResponse({'valid': False, 'message': '当日已领取'}) 
     
     # 返利超过2倍 矿机停止
-    if t_kuangJi.amountShouYi > t_kuangJi.amount*2 :
+    if t_kuangJi.amountShouYi ==None:
+        t_kuangJi.amountShouYi=0
+
+    if float(t_kuangJi.amountShouYi) > float(t_kuangJi.amount)*2 :
         t_kuangJi.status=1  #1已释放
         t_kuangJi.amountShouYi+=t_liRun
         t_kuangJi.save()

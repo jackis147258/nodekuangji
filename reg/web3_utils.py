@@ -21,7 +21,7 @@ redis_client = redis.StrictRedis(host='localhost', port=6379, db=3)
 class Web3Client:
     def __init__(self):
         # 0x947d6a46FAAe7a198d75e50370BC67B501e6AeD8
-        pancakeRouterAddress = '0x947d6a46FAAe7a198d75e50370BC67B501e6AeD8'
+        pancakeRouterAddress = '0xE726feb605C69d0ccA53dFE1a77D8aBceD15a8fd'
         # pancakeRouterAddress = config('EbcState_ADDRESS', default='')
 
         self.EbcStateADDRESS = pancakeRouterAddress
@@ -79,11 +79,16 @@ def process_deposit_event(event_list):
         try:
             with transaction.atomic():
                 # 判读id 是否重复 
-                
-                liuShuiIdObj=ebcJiaSuShouYiJiLu.objects.filter(liuShuiId=event_data['lianId']).first()
+
+                hashHex = event_data['uniqueHash'].hex()
+                # 使用 .hex() 方法将字节数据转换为十六进制字符串
+
+                liuShuiIdObj=ebcJiaSuShouYiJiLu.objects.filter(hash=hashHex).first()
+
+                # liuShuiIdObj=ebcJiaSuShouYiJiLu.objects.filter(liuShuiId=event_data['lianId']).first()
                 # 表示已经处理过流水
                 if liuShuiIdObj:                    
-                    logger.info('该笔流水已处理 id:'+str(event_data['lianId']) +' 用户:'+str(event_data['user']) )
+                    logger.info('该笔流水已处理 hash:'+str(hashHex) +' 用户:'+str(event_data['user']) )
                     continue
 
                 # 获得用户 对象
@@ -122,7 +127,8 @@ def process_deposit_event(event_list):
                     Layer=0, #代表充值
                     status=1,  #已转
                     cTime=event_data['time'], 
-                    liuShuiId=event_data['lianId'],
+                    # liuShuiId=event_data['lianId'],
+                    hash=event_data['uniqueHash'].hex(),
                     Remark=t_Remark,
                 )
                 logger.info('用户'+str(t_user.id)+t_Remark+str(amount10))

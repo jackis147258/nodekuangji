@@ -108,6 +108,8 @@ class ebcJiaSuShouYiJiLu(models.Model):
     tokenZhiYaJiShiId = models.IntegerField(db_comment='质押表ID',blank=True, null=True,default=0) 
 
     cTime = models.BigIntegerField(db_comment='操作时间',blank=True, null=True,default=0)   
+    hash = models.CharField(verbose_name="链上hash",max_length=255,blank=True, null=True, db_comment='链上hash')
+
  
 
 
