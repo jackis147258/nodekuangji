@@ -13,6 +13,7 @@ from rest_framework import serializers
 from app1.models import TcSearch,webInfo
 from .models import CustomUser ,ebcJiaSuShouYiJiLu,tokenZhiYaJiShi,payToken,userToken
 from typing import Optional
+from .utils import get_message
 
  
 
@@ -74,12 +75,13 @@ class CustomUserSerializer(serializers.ModelSerializer):
         #     "riShouYi":4 ,
         # }
         from .viewsNodeKJ import nodes_att_daily_rate,nodes_arr_siyang_payment,lou_ceng_gao_du 
- 
+
+        lang_value = self.context.get('lang')  # 从上下文中获取 lang 值 
         return {
             "kuangJiShu": cengShu ,
-            "jiaGe": str(nodes_arr_siyang_payment['nodeKJ'+str(cengShu)])+'/YS/JZ'  ,
-            "tiaoJiao":lou_ceng_gao_du[cengShu] ,
-            "riShouYi": '日收益'+str(nodes_att_daily_rate['nodeKJ'+str(cengShu)])+'%' ,
+            "jiaGe": str(nodes_arr_siyang_payment['nodeKJ'+str(cengShu)])+'/GB'  ,
+            "tiaoJiao":   get_message(lang_value, 'tiaoJiao_'+str(cengShu)) ,  #lou_ceng_gao_du[cengShu] ,
+            "riShouYi": 'Daily Earnings '+str(nodes_att_daily_rate['nodeKJ'+str(cengShu)])+'%' ,
         }
 
 
@@ -121,7 +123,19 @@ class payTokenSerializer(serializers.ModelSerializer):
         
     def get_status(self, obj):
         # 将整数状态映射到相应的字符串表示
-        return "到账" if obj.status == 1 else "未到账"
+        t_back="未生效"
+        if obj.status == 1:
+            t_back="返还"
+
+        if obj.status == 2:
+            t_back="hash验证失败"
+
+        if obj.status == 3:
+            t_back="hash验证成功"
+
+        
+        # return "到账" if obj.status == 3 else "未到账"
+        return t_back
     
 
 class webInfoSerializer(serializers.ModelSerializer):

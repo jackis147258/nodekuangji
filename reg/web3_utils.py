@@ -59,7 +59,7 @@ class Web3Client:
                 'amount': event['args']['amount'],
                 'layer': event['args']['layer'],
                 'time': event['args']['time'],
-                'lianId': event['args']['lianId'],
+                'uniqueHash': event['args']['uniqueHash'],
             }
             event_list.append(event_data)
         
@@ -118,7 +118,7 @@ def process_deposit_event(event_list):
                 if event_data['layer']==2:
                     now_userToken.jzToken+=amount10
                     now_userToken.save()
-                    t_Remark='充值JZ'
+                    t_Remark='充值GB'
                 
                   
                 ebcJiaSuShouYiJiLu.objects.create(

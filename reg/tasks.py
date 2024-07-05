@@ -25,7 +25,7 @@ def listen_toDeposit ():
     listen_to_deposit_events()
 
 
-
+# 提现
 @shared_task
 def listen_toWithdrawal ():
     listen_to_Withdrawal_events()

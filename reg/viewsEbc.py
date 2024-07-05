@@ -51,6 +51,7 @@ User = get_user_model()
 
 from django.utils import timezone
 from typing import Optional
+from .decorators import with_lang
 
 
 """四、 DRF的视图集viewsets"""
@@ -169,16 +170,32 @@ def ebc1(request):
 
 # @permission_classes((IsAuthenticated,))
 # class CustomUserListCreateView(generics.ListCreateAPIView):
+
 class CustomUserListCreateView(viewsets.ModelViewSet):
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
     lookup_field = 'username'  # 设置使用 username 字段来查找对象
-    
-    
-    def get(self, request, *args, **kwargs):
+
+
+# 处理GET 事件
+    def retrieve(self, request, *args, **kwargs):
         try:
             instance = self.get_object()
-            serializer = self.get_serializer(instance)
+            lang_value = request.headers.get('lang')  # 从请求头中获取 lang 值
+            serializer = self.get_serializer(instance, context={'lang': lang_value})
+            return Response(serializer.data)
+        except CustomUser.DoesNotExist:
+            return Response({"error": "Object not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+    # 不起作用
+    def get(self, request, *args, **kwargs):
+        try:
+            lang_value = request.lang   # zh-TC ,zh-CN,en
+            instance = self.get_object()         
+            lang_value = request.headers.get('lang')  # 从请求头中获取 lang 值
+            serializer = self.get_serializer(instance, context={'lang': lang_value})
+
             return Response(serializer.data)
         except instance.DoesNotExist:
             return Response({"error": "Object not found"}, status=status.HTTP_404_NOT_FOUND)

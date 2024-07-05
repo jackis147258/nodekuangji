@@ -3,4 +3,4 @@
 from .messages import messages
 
 def get_message(lang, key):
-    return messages.get(lang, messages['zh-CN']).get(key, key)
+    return messages.get(lang, {}).get(key, key)
