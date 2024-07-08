@@ -372,6 +372,9 @@ def buynodeKJ(request):
    
     try:
         with transaction.atomic():
+
+            # 直接在数据库层面进行过滤和计数
+            qualified_children_count = now_user.get_children().filter(cengShu__gte=2).count()
              #临时处理 老用户
             if kuangji == 0:   
                 if now_user.cengShu==0:
@@ -384,11 +387,11 @@ def buynodeKJ(request):
                 if now_user.kapaiA<1:
                     return JsonResponse({'valid': False, 'message': '燃料包不够'})
                 # 直接在数据库层面进行过滤和计数
-                qualified_children_count = now_user.get_children().filter(cengShu__gte=2).count()
+                # qualified_children_count = now_user.get_children().filter(cengShu__gte=2).count()
                 # qualified_children_count = now_user.get_children().count()
                 # 不满足 增加两个 有效人数
                 if kuangji!=1:
-                    # list1 = ['0x9e1322e3ca57fff1eeadc2b30f666bbaa5595350','0x606adb6c2b7d415e0fd58b7d9cff6b71e5139ceb'  ]
+                    # list1 = ['0xfd9cd5d0cefa797880e1263aa7b705240da58909','0x4b70d2170bf083c89b5bd70289c048c9be783af4'  ]
                     list1 = ['',''  ]
                     if now_user.username not in list1:
                         if qualified_children_count-now_user.zhiTuiNum<=1:
@@ -481,7 +484,9 @@ def buynodeKJ(request):
         result = ["Failed-everybadyFan", f"ERROR: {e}"]
         print(result)
         logger.info(result)
-        return result 
+        # return result 
+        return JsonResponse({'valid': False, 'message': {e} })
+
 
 
 # 购买燃料包 一次购买1个 100U一个 加入 A卡 1张
@@ -673,16 +678,7 @@ def getKJDayFanHuan(request):
     if t_kuangJi.uTime > current_timestamp   : #时间小于当前时间 已经领取
         return JsonResponse({'valid': False, 'message': '当日已领取'}) 
     
-    # 返利超过2倍 矿机停止
-    if t_kuangJi.amountShouYi ==None:
-        t_kuangJi.amountShouYi=0
-
-    if float(t_kuangJi.amountShouYi) > float(t_kuangJi.amount)*2 :
-        t_kuangJi.status=1  #1已释放
-        t_kuangJi.amountShouYi+=t_liRun
-        t_kuangJi.save()
-        return JsonResponse({'valid': False, 'message': '矿机质押到期请重新质押'}) 
-    
+   
 
     if t_kuangJi and t_kuangJi.status == 0 :   # 0 质押中,1已释放
         # isF,t_re=nodeKjFenRun.everybadyFan(t_kuangJi)
@@ -690,6 +686,19 @@ def getKJDayFanHuan(request):
 
          # 矿机质押 * 对应利润
         t_liRun=t_kuangJi.amount * nodes_att_daily_rate['nodeKJ'+str(t_kuangJi.nodeKjCode)]/100
+
+         # 返利超过2倍 矿机停止
+        if t_kuangJi.amountShouYi ==None:
+            t_kuangJi.amountShouYi=0
+
+        if float(t_kuangJi.amountShouYi) > float(t_kuangJi.amount)*3 :
+            t_kuangJi.status=1  #1已释放
+            t_kuangJi.amountShouYi+=t_liRun
+            t_kuangJi.save()
+            return JsonResponse({'valid': False, 'message': '矿机质押到期请重新质押'}) 
+    
+
+
 
      
         one_day_timestamp = 24 * 60 * 60
