@@ -148,7 +148,7 @@ def listen_to_deposit_events():
 
     if not redis_client.exists('latest_block'):
         # 如果不存在，则将 t_pyUserNumberAll 设置为 0
-        latest_block = 39480264
+        latest_block = 59355519
     else:
         # 如果存在，则从 Redis 中获取值
         latest_block = redis_client.get('latest_block')  
