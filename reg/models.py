@@ -157,6 +157,14 @@ class tokenZhiYaJiShi(models.Model):
         if t_kuangji:
             return t_kuangji
         return None
+    
+    @staticmethod
+    def get_kuangjiList0_by_uid(t_user):
+        # 过滤 uid 等于 没有质押的用户
+        t_kuangji = tokenZhiYaJiShi.objects.filter(uid=t_user).first()
+        if t_kuangji:
+            return t_kuangji
+        return None
 
 
 

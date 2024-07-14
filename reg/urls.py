@@ -52,6 +52,12 @@ urlpatterns = [
 
     path('buynodeKJStart/', viewsNodeKJ.buynodeKJStart, name='buynodeKJStart'),
 
+      # 节点矿机usdt 质押
+    path('buynodeKJUsdt/', viewsNodeKJ.buynodeKJUsdt, name='buynodeKJUsdt'),
+
+
+    
+
 
 
 

@@ -261,6 +261,170 @@ lou_ceng_tu_di = {
 
 
 
+
+# 购买矿机处理
+#1 根据矿机类型 扣款 2/.购买矿机，保存数据库
+@api_view(["POST"])
+def buynodeKJUsdt(request): 
+    t_username = request.data.get('username')   
+    number = int(request.data.get('number'))     
+    now_user = User.objects.filter(username=t_username).first()  # type: Optional[CustomUser] 
+    if not now_user:
+        return JsonResponse({'valid': False, 'message': '用户不存在'})
+      # 得到用户token表
+    now_userToken = now_user.usertoken_set.first()     # type: Optional[userToken] 
+    if  not now_userToken: 
+        return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
+    
+    # #产看矿机是否已经购买      
+    # queryset = tokenZhiYaJiShi.objects.filter(uid=now_user, tokenName=str(kuangji) + '号矿机')
+    # if queryset.exists():
+    #     # return JsonResponse({'message': '记录已存在', 'status': 'exists'})
+    #     return JsonResponse({'valid': False, 'message': str(kuangji) + '号矿机已存在'}) 
+    
+    #购买n矿机 余额是否足够
+    if now_userToken.usdtToken<number:
+        return JsonResponse({'valid': False, 'message':'用户余额不足'}) 
+    # 
+
+   
+    try:
+        with transaction.atomic():
+
+            # # 直接在数据库层面进行过滤和计数
+            # qualified_children_count = now_user.get_children().filter(cengShu__gte=2).count()
+         
+            # #设置当前有效直推人数     
+            # list1 = ['0x606adb6c2b7d415e0fd58b7d9cff6b71e5139ceb','0x4b70d2170bf083c89b5bd70289c048c9be783af4'  ]
+            # # list1 = ['',''  ]
+            # if now_user.username not in list1:
+            #     if qualified_children_count-now_user.zhiTuiNum<=1:
+            #         return JsonResponse({'valid': False, 'message':'不满足增加两个有效人数'})  
+            # now_user.zhiTuiNum= qualified_children_count         #设置当前有效直推人数           
+            # now_user.save()
+
+          
+            # 得到 10% 奖金池
+
+            # t_jj10=0
+            # isjj=False
+            # if kuangji in [5, 10, 15, 20, 25]:
+            #     now_webid = webInfo.objects.filter(webid=3).first()
+            #     t_jj10=now_webid.jiangJinChi*(jiangJinChi_fenghong[kuangji])
+            #     now_webid.jiangJinChi-=t_jj10
+            #     now_webid.save()    
+            #     isjj=True
+
+            #扣除用户jz
+            # now_userToken.jzToken=now_userToken.jzToken-nodes_arr_siyang_payment['nodeKJ'+str(kuangji)]
+                #扣除用户jz
+            now_userToken.usdtToken=now_userToken.usdtToken-number
+            # 增加奖金池奖金
+            # now_userToken.jzToken+=t_jj10                 
+            now_userToken.save()
+            # 需要处理 奖金日志
+            # if isjj:
+            #     # 写入记录 得到 10% 奖金池
+            #     ebcJiaSuShouYiJiLu.objects.create(
+            #         uidB=now_user.id,
+            #         status=1,
+            #         fanHuan=t_jj10,
+            #         cTime=int(timezone.now().timestamp()),#质押更新时间
+            #         # liuShuiId=int(value[4][i]),
+            #         Layer=11, #得到奖金池 
+            #         Remark='奖金池奖励:'+str(t_jj10)+' :'+str(int(jiangJinChi_fenghong[kuangji]*100))+'%'  #+config('TOKEN_NAME2', default='') 
+            #     )
+
+
+            # 记录质押矿机 信息
+            new_tokenZhiYaJiShi =tokenZhiYaJiShi.objects.create(
+                tokenName='质押usdt'+str(number),
+                # nodeKjCode=kuangji,
+                number=1, #质押台数 1台
+                amount=number,#质押每台额度 
+                amountType='usdt',#质押使用类型 usdt  jz  mrb
+                status=0,
+                Layer=0, #0 是矿机  非零 是 各类卡牌
+                uid=now_user,
+                zhiYaTime=int(timedelta(days=150).total_seconds())   ,     #质押时间
+                kaiShiTime=int(timezone.now().timestamp()),#质押开始时间
+                uTime=int(timezone.now().timestamp()),#质押更新时间
+                # Remark=str(now_user.id)+'质押usdt,直推人数:'+str(qualified_children_count)
+                Remark=str(now_user.id)+'质押usdt'
+            )
+        
+        # 写入记录
+            ebcJiaSuShouYiJiLu.objects.create(
+                uidB=now_user.id,
+                status=1,
+                fanHuan=number,
+                cTime=int(timezone.now().timestamp()),#质押更新时间
+                # liuShuiId=int(value[4][i]),
+                Layer=0, #质押矿机 
+                Remark='质押usdt:'+str(number)  #+config('TOKEN_NAME2', default='') 
+            )
+          
+      
+        # logger.info('成功质押矿机:'+str(now_user.username) )
+        # 处理分润 给上级反10% U 
+            try:                
+                parentUser = CustomUser.objects.get(id=now_user.parent_id)
+                # 执行获取到 parentUser 后的逻辑
+            except CustomUser.DoesNotExist:
+                # 处理 parentUser 不存在的情况
+                return JsonResponse({'valid': False, 'message':'分润问题:上级用户不存在'})
+
+              # 得到用户token表
+            parentUser_userToken = parentUser.usertoken_set.first()     # type: Optional[userToken] 
+            if  not parentUser_userToken: 
+                return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
+          
+            # 如果矿机有停运状态 不能那反润
+            if tokenZhiYaJiShi.get_kuangjiList0_by_uid(parentUser) != None:
+                logger.info('用户id:'+str(parentUser.Id)+',name:' +parentUser.username+'用户没有质押过,不能获取' ) 
+                return JsonResponse({'valid': False, 'message': '用户没有质押过,不能获取'}) 
+
+            children_count = parentUser.get_children().count()  
+            # 看是否满足返还条件 存在一个直推用户
+            if children_count>1 :
+                t_tiCheng=number*0.1
+                parentUser_userToken.usdtToken+=t_tiCheng  
+                parentUser_userToken.save() 
+
+                # 写入记录     
+                t_ebcJiaSuShouYiJiLu=ebcJiaSuShouYiJiLu ()
+                t_ebcJiaSuShouYiJiLu.uidA=now_user.id   #发送方
+                t_ebcJiaSuShouYiJiLu.uidB=parentUser.id  # 接收方
+                t_ebcJiaSuShouYiJiLu.status=1  #已转
+                t_ebcJiaSuShouYiJiLu.Layer=1  # 0充值 1 代数 2 层数 
+                t_ebcJiaSuShouYiJiLu.fanHuan=t_tiCheng
+                t_ebcJiaSuShouYiJiLu.Remark='分享奖励：' +str(t_tiCheng)      #'返10%'    
+                t_ebcJiaSuShouYiJiLu.save()   
+                # 计入奖金池
+                # t_jiasuJiangJinChi
+                now_webid = webInfo.objects.filter(webid=3).first()    
+                now_webid.jiangJinChi=now_webid.jiangJinChi+t_tiCheng
+                now_webid.save() 
+
+        # isOk,message=nodeKjFenRun.userFenRun(now_user,new_tokenZhiYaJiShi.number,0,nodes_att_daily_rate['nodeKJ'+str(kuangji)])
+        # if isOk:
+        #     return JsonResponse({'valid': True, 'message': '矿机质押成功'+'分润成功'})
+        # else:
+        #     return JsonResponse({'valid': False, 'message':'矿机质押成功'+'分润问题:'+ message})
+
+        return JsonResponse({'valid': True, 'message': '质押成功' })
+ 
+        
+    except Exception as e:
+        # 处理异常
+        result = ["Failed-everybadyFan", f"ERROR: {e}"]
+        print(result)
+        logger.info(result)
+        # return result 
+        return JsonResponse({'valid': False, 'message': {e} })
+
+
+
 # 停止矿机激活
 #1 根据矿机类型 扣款 2/.购买矿机，保存数据库
 @api_view(["POST"])
@@ -691,7 +855,7 @@ def getKJDayFanHuan(request):
         if t_kuangJi.amountShouYi ==None:
             t_kuangJi.amountShouYi=0
 
-        if float(t_kuangJi.amountShouYi) > float(t_kuangJi.amount)*3 :
+        if float(t_kuangJi.amountShouYi) > float(t_kuangJi.amount)*1.5 :
             t_kuangJi.status=1  #1已释放
             t_kuangJi.amountShouYi+=t_liRun
             t_kuangJi.save()
@@ -725,12 +889,14 @@ def getKJDayFanHuan(request):
         t_ebcJiaSuShouYiJiLu.Remark='当日反润'+str(t_liRun )
         t_ebcJiaSuShouYiJiLu.save() 
 
-        isOk,message=nodeKjFenRun.userFenRun(now_user,t_liRun,1,nodes_att_daily_rate['nodeKJ'+str(t_kuangJi.nodeKjCode)])
+        return JsonResponse({'valid': True, 'message': '质押成功' })
 
-        if isOk:
-            return JsonResponse({'valid': True, 'message': '当日反润成功'+'分润成功'})
-        else:
-            return JsonResponse({'valid': False, 'message':'当日反润成功'+ message}) 
+        # isOk,message=nodeKjFenRun.userFenRun(now_user,t_liRun,1,nodes_att_daily_rate['nodeKJ'+str(t_kuangJi.nodeKjCode)])
+
+        # if isOk:
+        #     return JsonResponse({'valid': True, 'message': '当日反润成功'+'分润成功'})
+        # else:
+        #     return JsonResponse({'valid': False, 'message':'当日反润成功'+ message}) 
     else:
         return JsonResponse({'valid': False, 'message': '矿机已结束质押'})
 

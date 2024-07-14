@@ -21,7 +21,7 @@ redis_client = redis.StrictRedis(host='localhost', port=6379, db=3)
 class Web3Client:
     def __init__(self):
         # 0x947d6a46FAAe7a198d75e50370BC67B501e6AeD8
-        pancakeRouterAddress = '0xE726feb605C69d0ccA53dFE1a77D8aBceD15a8fd'
+        pancakeRouterAddress = '0x7E7291E719361F008BE41AfBB2184c30a9FEfffF'
         # pancakeRouterAddress = config('EbcState_ADDRESS', default='')
 
         self.EbcStateADDRESS = pancakeRouterAddress
