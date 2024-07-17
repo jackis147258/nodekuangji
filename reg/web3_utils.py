@@ -42,7 +42,7 @@ class Web3Client:
         # if latest_block>now_block:
         #     latest_block=now_block
 
-        from_block = latest_block - 20 if latest_block >= 10 else 0
+        from_block = latest_block - 40 if latest_block >= 10 else 0
         to_block = latest_block
         logger.info('充值记录 ...区块'+str(from_block)+'to:'+str(to_block))
         logger.info('合约地址'+str(self.EbcStateADDRESS) )
@@ -157,7 +157,7 @@ def listen_to_deposit_events():
     event_list = web3_client.listen_deposit_events(int(latest_block))
     
     process_deposit_event(event_list)
-    redis_client.set('latest_block', str(int(latest_block) + 19)) 
+    redis_client.set('latest_block', str(int(latest_block) + 39)) 
 
     # time.sleep(2)
 

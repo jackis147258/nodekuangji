@@ -553,7 +553,7 @@ def isKapai(request):
     # if now_user.status==1:
     #     return JsonResponse({'valid': False, 'message': '矿机正在运行中'}) 
     
-    if kuangji==2000:
+    if kuangji==5000:
         if now_user.kapaiA>=1:
             now_user.kapaiA=now_user.kapaiA-1
             now_user.status=1          #改变状态 1 不可以在次购买矿机          
@@ -569,7 +569,7 @@ def isKapai(request):
             return JsonResponse({'valid': True, 'message': '成功'}) 
         else:
             return JsonResponse({'valid': False, 'message': '卡牌不够'}) 
-    if kuangji==4000:
+    if kuangji==10000:
         if now_user.kapaiB>=1:
             now_user.kapaiB=now_user.kapaiB-1
             now_user.status=1          #改变状态 1 不可以在次购买矿机          
@@ -587,7 +587,7 @@ def isKapai(request):
         else:
             return JsonResponse({'valid': False, 'message': '卡牌不够'}) 
         
-    if kuangji==6000:
+    if kuangji==20000:
         if now_user.kapaiC>=1:
             now_user.kapaiC=now_user.kapaiC-1
             now_user.status=1          #改变状态 1 不可以在次购买矿机          

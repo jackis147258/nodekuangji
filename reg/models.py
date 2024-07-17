@@ -145,6 +145,8 @@ class tokenZhiYaJiShi(models.Model):
 
     amount= models.FloatField(db_comment='质押额度',verbose_name="质押额度",  blank=True, null=True)
     amountType = models.CharField(verbose_name="质押类型",max_length=255,blank=True, null=True, db_comment='质押类型')
+    amountShouYi= models.FloatField(db_comment='质押收益',verbose_name="质押收益",  blank=True, null=True)
+
 
 
 
@@ -274,4 +276,22 @@ class userToken(models.Model):
         db_table_comment = '用户Token'
         # verbose_name="task地址"
         verbose_name_plural = "用户Token"  # 设置 admin 界面上模型的显示名称
+
+
+
+class telegrames(models.Model):  
+
+    status_choices=[
+        (0,"未生效"),
+        (1,"已生效"),       
+    ]
+    status = models.IntegerField(db_comment='0 未生效,1已生效',blank=True, null=True,choices=status_choices,default=0) 
+    cTime = models.IntegerField(db_comment='操作时间',blank=True, null=True,default=0)   
+    uTime =models.IntegerField(db_comment='更新时间',blank=True, null=True,default=0) 
+    TelUserId = models.CharField(verbose_name="TelUserId",max_length=255,blank=True, null=True, db_comment='TelUserId')
+    TelUserName = models.CharField(verbose_name="TelUserName",max_length=255,blank=True, null=True, db_comment='TelUserName')
+    TelUserText = models.CharField(verbose_name="TelUserText",max_length=255,blank=True, null=True, db_comment='TelUserText')
+    Remark = models.CharField(verbose_name="备注",max_length=255,blank=True, null=True, db_comment='task备注')
+    # uid = models.ForeignKey(CustomUser,on_delete=models.CASCADE)
+    created_at = models.DateTimeField(verbose_name="创建时间",blank=True, null=True,auto_now_add=True)  
 

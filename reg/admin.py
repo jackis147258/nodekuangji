@@ -5,7 +5,7 @@ from django.contrib import admin
 
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
-from .models import CustomUser,ebcJiaSuShouYiJiLu ,tokenZhiYaJiShi,payToken,userToken
+from .models import CustomUser,ebcJiaSuShouYiJiLu ,tokenZhiYaJiShi,payToken,userToken,telegrames
 
 from django.http import HttpResponse, JsonResponse
 
@@ -523,4 +523,25 @@ class  userTokenAdmin(AjaxAdmin):
     search_fields = ('id', 'uid__username')  # 添加搜索字段
 
         
+
+
+@admin.register(telegrames)
+class  telegramesAdmin(AjaxAdmin):
     
+    # fieldsets = (
+    #     (None, {
+    #         'fields':  ('uidA','uidB','status' ,'fanHuan','Layer','liuShuiId','Remark' , )
+    #     }),
+    # )
+
+
+    # add_fieldsets = UserAdmin.add_fieldsets + (
+    #     (None, {'fields': ('parent','email')}),
+    # )
+    
+        # actions = ('layer_input','layer_close',perform_check_all)
+    list_display = ('id','TelUserId','TelUserName','TelUserText','status'  ,'Remark' ,'created_at'       )
+    
+    list_filter = ('TelUserId', 'TelUserName')  # 添加筛选器
+    # search_fields = ('uid', 'id')  # 添加搜索字段
+    search_fields = ('TelUserId', 'TelUserName')  # 添加搜索字段

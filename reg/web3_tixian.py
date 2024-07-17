@@ -39,7 +39,7 @@ class Web3TiXian:
        
         # 从最新的 10 个区块中获取事件日志
         # latest_block = self.web3.eth.block_number
-        from_block = latest_block - 20 if latest_block >= 10 else 0
+        from_block = latest_block - 40 if latest_block >= 10 else 0
         to_block = latest_block
         logger.info('提现记录 ...区块'+str(from_block)+'to:'+str(to_block) )
         logger.info('合约地址'+str(self.EbcStateADDRESS) )
@@ -167,7 +167,7 @@ def listen_to_Withdrawal_events():
     event_list = web3_client.listen_Withdrawal_events(int(latest_block))
     
     process_Withdrawal_event(event_list)
-    redis_client.set('tiXianLatest_block', str(int(latest_block) + 19)) 
+    redis_client.set('tiXianLatest_block', str(int(latest_block) + 39)) 
    
   
 
