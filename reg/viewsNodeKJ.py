@@ -78,7 +78,7 @@ from django.db.models import Q
 from .decorators import with_lang
 
 from .utils import get_message
-
+from .nodeKjSheQu import TDyeJi
 # 导入必要的模块
 
 # 矿机属性饲养周期
@@ -268,6 +268,9 @@ lou_ceng_tu_di = {
 def buynodeKJUsdt(request): 
     t_username = request.data.get('username')   
     number = int(request.data.get('number'))     
+    # 如果 number 是负数，将其转换为正数
+    if number < 0:
+        number = abs(number)
     now_user = User.objects.filter(username=t_username).first()  # type: Optional[CustomUser] 
     if not now_user:
         return JsonResponse({'valid': False, 'message': '用户不存在'})
@@ -315,9 +318,7 @@ def buynodeKJUsdt(request):
             #     now_webid.save()    
             #     isjj=True
 
-            #扣除用户jz
-            # now_userToken.jzToken=now_userToken.jzToken-nodes_arr_siyang_payment['nodeKJ'+str(kuangji)]
-                #扣除用户jz
+            #扣除用户jz         
             now_userToken.usdtToken=now_userToken.usdtToken-number
             # 增加奖金池奖金
             # now_userToken.jzToken+=t_jj10                 
@@ -362,8 +363,7 @@ def buynodeKJUsdt(request):
                 # liuShuiId=int(value[4][i]),
                 Layer=0, #质押矿机 
                 Remark='质押usdt:'+str(number)  #+config('TOKEN_NAME2', default='') 
-            )
-          
+            )          
       
         # logger.info('成功质押矿机:'+str(now_user.username) )
         # 处理分润 给上级反10% U 
@@ -380,8 +380,8 @@ def buynodeKJUsdt(request):
                 return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
           
             # 如果矿机有停运状态 不能那反润
-            if tokenZhiYaJiShi.get_kuangjiList0_by_uid(parentUser) != None:
-                logger.info('用户id:'+str(parentUser.Id)+',name:' +parentUser.username+'用户没有质押过,不能获取' ) 
+            if tokenZhiYaJiShi.get_kuangjiList0_by_uid(parentUser) == None:
+                logger.info('用户id:'+str(parentUser.id)+',name:' +parentUser.username+'用户没有质押过,不能获取' ) 
                 return JsonResponse({'valid': False, 'message': '用户没有质押过,不能获取'}) 
 
             children_count = parentUser.get_children().count()  
@@ -390,6 +390,9 @@ def buynodeKJUsdt(request):
                 t_tiCheng=number*0.1
                 parentUser_userToken.usdtToken+=t_tiCheng  
                 parentUser_userToken.save() 
+                
+                # parentUser.fanHuan+=t_tiCheng
+                # parentUser.save()
 
                 # 写入记录     
                 t_ebcJiaSuShouYiJiLu=ebcJiaSuShouYiJiLu ()
@@ -403,16 +406,23 @@ def buynodeKJUsdt(request):
                 # 计入奖金池
                 # t_jiasuJiangJinChi
                 now_webid = webInfo.objects.filter(webid=3).first()    
-                now_webid.jiangJinChi=now_webid.jiangJinChi+t_tiCheng
+                t_FanUsdt=number*0.05 #5% 作为分润
+                # t_FanUsdt 转为 amt  0.1 为amt 价格
+                t_amtPrice=t_FanUsdt
+                now_webid.jiangJinChi=now_webid.jiangJinChi+t_amtPrice
                 now_webid.save() 
 
+            # 团队业绩记录
+            t_backStr=TDyeJi(now_user,number)
+ 
         # isOk,message=nodeKjFenRun.userFenRun(now_user,new_tokenZhiYaJiShi.number,0,nodes_att_daily_rate['nodeKJ'+str(kuangji)])
         # if isOk:
         #     return JsonResponse({'valid': True, 'message': '矿机质押成功'+'分润成功'})
         # else:
         #     return JsonResponse({'valid': False, 'message':'矿机质押成功'+'分润问题:'+ message})
+        return JsonResponse(t_backStr)
 
-        return JsonResponse({'valid': True, 'message': '质押成功' })
+        # return JsonResponse({'valid': True, 'message': '质押成功' })
  
         
     except Exception as e:
@@ -809,7 +819,7 @@ def getKJDayFanHuan(request):
     
     t_kuangJi = tokenZhiYaJiShi.objects.filter(id=t_kuangJiId).first()
 
-    now_user = User.objects.filter(username=t_kuangJi.uid).first()  
+    now_user = User.objects.filter(username=t_kuangJi.uid).first()  # type: Optional[CustomUser] 
     if not now_user:
         return JsonResponse({'valid': False, 'message': '用户不存在'})
       # 得到用户token表
@@ -849,7 +859,7 @@ def getKJDayFanHuan(request):
         # 矿机 当天收益时间 加一天， 用户得到当日收益 并保存
 
          # 矿机质押 * 对应利润
-        t_liRun=t_kuangJi.amount * nodes_att_daily_rate['nodeKJ'+str(t_kuangJi.nodeKjCode)]/100
+        t_liRun=t_kuangJi.amount * 0.01
 
          # 返利超过2倍 矿机停止
         if t_kuangJi.amountShouYi ==None:
@@ -860,11 +870,6 @@ def getKJDayFanHuan(request):
             t_kuangJi.amountShouYi+=t_liRun
             t_kuangJi.save()
             return JsonResponse({'valid': False, 'message': '矿机质押到期请重新质押'}) 
-    
-
-
-
-     
         one_day_timestamp = 24 * 60 * 60
         print(one_day_timestamp)
         # t_jiasu15=0
@@ -872,12 +877,12 @@ def getKJDayFanHuan(request):
         t_kuangJi.amountShouYi+=t_liRun
         t_kuangJi.save()
 
-       
-        # now_userToken.jzToken+=t_liRun
-        # now_userToken.save()
-
-        now_user.fanHuan+=t_liRun
-        now_user.save()
+    #    加入用户 token 账户  jz 本项目代币AMT
+        now_userToken.jzToken+=t_liRun  
+        now_userToken.save()
+# 加入用户返还
+        # now_user.fanHuan+=t_liRun        
+        # now_user.save()
            
         # 写入记录     
         t_ebcJiaSuShouYiJiLu=ebcJiaSuShouYiJiLu ()
@@ -889,7 +894,7 @@ def getKJDayFanHuan(request):
         t_ebcJiaSuShouYiJiLu.Remark='当日反润'+str(t_liRun )
         t_ebcJiaSuShouYiJiLu.save() 
 
-        return JsonResponse({'valid': True, 'message': '质押成功' })
+        return JsonResponse({'valid': True, 'message': '当日反润领取' })
 
         # isOk,message=nodeKjFenRun.userFenRun(now_user,t_liRun,1,nodes_att_daily_rate['nodeKJ'+str(t_kuangJi.nodeKjCode)])
 
@@ -922,6 +927,8 @@ SECRET_KEY = '0x9ba61124ddeb2c0c444ac5b643833bf24421d97eed3c9ede44a771319054bc9d
 def generate_signature(request):
     user_address = request.data.get('username')
     amount = int(request.data.get('amount'))
+    layer = int(request.data.get('layer'))
+
     timestamp = int(time.time())
 
      # 确保 amount 是正整数且不为零
@@ -957,7 +964,7 @@ def generate_signature(request):
         # 将地址编码为bytes 
         user_addressCheck=Web3.to_checksum_address(user_address)   
 
-        encoded_data = eth_abi.encode(['address', 'uint256', 'uint256'], [user_addressCheck, amount, timestamp])   
+        encoded_data = eth_abi.encode(['address', 'uint256', 'uint256','uint256'], [user_addressCheck, amount,layer, timestamp])   
     
         # encoded_data = eth_abi.encode([ 'uint256','uint256'], [ amount,timestamp])    
         # 使用 Keccak256 进行哈希
@@ -969,36 +976,35 @@ def generate_signature(request):
         # 使用生成的私钥
         private_key = '0x9ba61124ddeb2c0c444ac5b643833bf24421d97eed3c9ede44a771319054bc9d'
         signed_message = Account.sign_message(encode_defunct(hexstr=message_hash_hex), private_key)
-
         signature = signed_message.signature.hex()
-
-
-    
-
 
         # 写入记录     
         t_payToken=payToken ()
         # t_payToken.uidA=t_user   #发送方
         t_payToken.uidB=now_user.id  # 接收方
         t_payToken.status=0  # 
-        t_payToken.Layer=0        
+        t_payToken.Layer=layer        
         t_payToken.amount=amount10
         t_payToken.tiXianWallter=user_address
         t_payToken.HashId=message_hash_hex
-        t_payToken.Remark='用户提现'    
+        t_payToken.Remark='用户提现,提币类型:'+layer
         t_payToken.save()  
-        # 扣费
-        now_user.fanHuan-=amount10
-        now_user.save()
+        # 扣费 usdet
+        if layer==1:
+            now_userToken.usdtToken-=amount10
+            now_userToken.save()
+        # 扣费 amt 的 fanhuan 部分
+        if layer==2:
+            now_user.fanHuan-=amount10
+            now_user.save()
         # now_userToken.jzToken-=amount10
         # now_userToken.save()
         # 10% 记录到 奖金池
-        # 计入奖金池
-        now_webid = webInfo.objects.filter(webid=3).first()     
 
-        
-        now_webid.jiangJinChi=now_webid.jiangJinChi+(amount10*0.1)
-        now_webid.save()
+        # 计入奖金池
+        # now_webid = webInfo.objects.filter(webid=3).first()  
+        # now_webid.jiangJinChi=now_webid.jiangJinChi+(amount10*0.1)
+        # now_webid.save()
 
         result = {
             'signature': signature,
@@ -1012,6 +1018,52 @@ def generate_signature(request):
         logger.info(result)
         return JsonResponse({'valid': False, 'message': result})  
 
+
+
+@api_view(["POST"])
+def verify_signatureABC(request):
+    # 从请求中获取数据
+    user_address = request.data.get('username')
+    amount = int(request.data.get('amount'))
+    layer = int(request.data.get('layer'))
+
+    timestamp = int(request.data.get('timestamp'))
+    signature = request.data.get('signature')
+
+    # user_address='0x606adb6c2b7d415e0fd58b7d9cff6b71e5139ceb'
+    user_address=Web3.to_checksum_address(user_address)   
+
+
+    # 使用 eth_abi 编码数据
+    encoded_data = eth_abi.encode(['address'],['uint256', 'uint256','uint256'], [user_address, amount,layer, timestamp])
+    
+    # 使用 Keccak256 进行哈希
+    hasher = keccak.new(digest_bits=256)
+    hasher.update(encoded_data)
+    message_hash = hasher.digest()
+    message_hash_hex = message_hash.hex()
+    print(f"Python 生成的 message_hash: {message_hash_hex}")
+
+    # 构建签名消息
+    eth_signed_message = encode_defunct(hexstr=message_hash_hex)
+
+    # 使用公钥验证签名
+    recovered_address = Account.recover_message(eth_signed_message, signature=signature)
+
+    # 预期的签名者地址
+    expected_address = '0x1C4329990c5E14d74e13ACF68815d45b130ae225'
+
+    # 验证签名是否有效
+    valid_signature = (recovered_address.lower() == expected_address.lower())
+
+    result = {
+        'valid_signature': valid_signature,
+        'recovered_address': recovered_address,
+        'expected_address': expected_address,
+        'hash': message_hash_hex
+    }
+
+    return JsonResponse({'valid': valid_signature, 'message': result})
 
 
 

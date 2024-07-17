@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 from typing import Optional
 import redis
 
-redis_client = redis.StrictRedis(host='localhost', port=6379, db=3)
+redis_client = redis.StrictRedis(host='localhost', port=6379, db=4)
 
 class Web3Client:
     def __init__(self):

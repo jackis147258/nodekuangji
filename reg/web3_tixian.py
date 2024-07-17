@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 from typing import Optional
 import redis
 
-redis_client = redis.StrictRedis(host='localhost', port=6379, db=3)
+redis_client = redis.StrictRedis(host='localhost', port=6379, db=4)
 
 class Web3TiXian:
     def __init__(self):
@@ -53,7 +53,8 @@ class Web3TiXian:
         for event in events:
             event_data = {
                 'user': event['args']['user'],
-                'amount': event['args']['amount'],                
+                'amount': event['args']['amount'],   
+                'layer': event['args']['layer'],             
                 'time': event['args']['timestamp'],
                 'hash': event['args']['hash'],
             }
@@ -128,6 +129,9 @@ def process_Withdrawal_event(event_list):
                 
                   
                 amount10=float(format_token_amount(event_data['amount']))
+                
+                layer=float(format_token_amount(event_data['layer']))
+
 
                 # ebcJiaSuShouYiJiLu.objects.create(
                 #     uidB=t_user.id,
@@ -137,7 +141,7 @@ def process_Withdrawal_event(event_list):
                 #     cTime=event_data['time'], 
                 #     Remark=str(t_user.id)+t_Remark+':'+str(event_data['hash']),
                 # )
-                logger.info('提现：'+str(t_user.id)+t_Remark+str(amount10) )
+                logger.info('提现：'+str(t_user.id)+t_Remark+str(amount10)+'类型:'+str(layer))
         except Exception as e:
                     # 处理异常
                     result = ["Failed-tiXian", f"ERROR: {e}"]

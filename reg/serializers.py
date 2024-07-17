@@ -39,7 +39,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         # fields = '__all__'
-        fields = ("id","username", "userStakesA","userStakesB", "userStakesBfanHuan", "fanHuan","EbcCreated_at", "EbcLastFanHuan_at", "status", "parent","kapaiLevel","userLevel","tuanduiLevel","kapaiA","kapaiB","kapaiC","cengShu","tokenNum" )
+        fields = ("id","username", "userStakesA","userStakesB", "userStakesBfanHuan", "fanHuan","EbcCreated_at", "EbcLastFanHuan_at", "status", "parent","kapaiLevel","userLevel","tuanduiLevel","kapaiA","kapaiB","kapaiC","cengShu","tokenNum" ,"TDxiaoQuAmount",)
 
 
     def get_tokenNum(self, obj):
@@ -83,7 +83,6 @@ class CustomUserSerializer(serializers.ModelSerializer):
             "tiaoJiao":   get_message(lang_value, 'tiaoJiao_'+str(cengShu)) ,  #lou_ceng_gao_du[cengShu] ,
             "riShouYi": 'Daily Earnings '+str(nodes_att_daily_rate['nodeKJ'+str(cengShu)])+'%' ,
         }
-
 
 
 class ebcJiaSuShouYiJiLuSerializer(serializers.ModelSerializer):

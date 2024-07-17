@@ -47,6 +47,9 @@ urlpatterns = [
     path('signature/', viewsNodeKJ.generate_signature, name='signature'),
     path('generate_key/', viewsNodeKJ.generate_key, name='generate_key'),
     path('verify_signature/', viewsNodeKJ.verify_signature, name='verify_signature'),
+    
+    path('verify_signatureABC/', viewsNodeKJ.verify_signatureABC, name='verify_signature'),
+
 
     path('fanTiXian/', viewsNodeKJ.fanTiXian, name='verify_signature'),
 

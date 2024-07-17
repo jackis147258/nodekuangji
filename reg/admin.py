@@ -32,6 +32,7 @@ User = get_user_model()
 from typing import Optional
 
 from .nodeKjFenRun import fanTiXianTime
+from .nodeKjSheQu import sheQuFenRun
 # import web3_utils 
 def export_excel(modeladmin, request, queryset):
     # 创建一个 Excel 工作簿
@@ -422,6 +423,16 @@ class  payTokenAdmin(AjaxAdmin):
             if int_value==6:                
                 qukuai=post.get('qukuai')  
                 web3_tixian.listen_to_Withdrawal_eventsOne(qukuai)
+
+            
+                # 社区分润
+            if int_value==7:                
+                # qukuai=post.get('qukuai')  
+                sheQuFenRun()
+
+
+            
+            
             
             # if t_return is not None:
             #     createEbcUser(t_return)
@@ -481,7 +492,7 @@ class  payTokenAdmin(AjaxAdmin):
             # key 对应post参数中的key
             'key': 'name',
             # 显示的文本
-            'label': '1提现 2处理hash 3充值 4 提现 5 充值区块 6提现区块' ,
+            'label': '1提现 2处理hash 3充值 4 提现 5 充值区块 6提现区块 7 社区业绩分润' ,
             # 为空校验，默认为False
             'require': True
         },      

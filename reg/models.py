@@ -54,6 +54,12 @@ class CustomUser(MPTTModel, AbstractUser):
 
     zhiTuiNum = models.IntegerField(db_comment='暂存直推人数',blank=True, null=True,default=0)
 
+    TDallAmount= models.FloatField(db_comment='团队总值',verbose_name="团队总值", blank=True, null=True,default=0)
+
+    TDxiaoQuAmount= models.FloatField(db_comment='团队小区总值',verbose_name="团队小区总值", blank=True, null=True,default=0)
+
+
+
 
 
      
@@ -225,7 +231,7 @@ class payToken(models.Model):
     amount= models.FloatField(db_comment='每次返还额度',verbose_name="每次返还额度", blank=True, null=True,default=0)
     liuShuiId = models.IntegerField(db_comment='流水ID 合约同步',blank=True, null=True,default=0) 
     Remark = models.CharField(verbose_name="备注",max_length=255,blank=True, null=True, db_comment='task备注')
-    Layer = models.IntegerField(verbose_name="类型",db_comment='0提现',blank=True, null=True,default=0)    
+    Layer = models.IntegerField(verbose_name="类型",db_comment='1usdt 2 amt 3 amt',blank=True, null=True,default=0)    
     tiXianWallter = models.CharField(verbose_name="提现钱包",max_length=255,blank=True, null=True, db_comment='提现钱包')
     TxHash = models.CharField(verbose_name="交易hash",max_length=255,blank=True, null=True, db_comment='交易hash')    
     hashInfo = models.CharField(verbose_name="hash信息",max_length=255,blank=True, null=True, db_comment='hash信息') 
