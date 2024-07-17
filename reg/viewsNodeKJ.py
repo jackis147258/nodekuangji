@@ -390,7 +390,7 @@ def buynodeKJUsdt(request):
                 t_tiCheng=number*0.1
                 parentUser_userToken.usdtToken+=t_tiCheng  
                 parentUser_userToken.save() 
-                
+
                 # parentUser.fanHuan+=t_tiCheng
                 # parentUser.save()
 
@@ -987,7 +987,7 @@ def generate_signature(request):
         t_payToken.amount=amount10
         t_payToken.tiXianWallter=user_address
         t_payToken.HashId=message_hash_hex
-        t_payToken.Remark='用户提现,提币类型:'+layer
+        t_payToken.Remark='用户提现,提币类型:'+str(layer)
         t_payToken.save()  
         # 扣费 usdet
         if layer==1:
