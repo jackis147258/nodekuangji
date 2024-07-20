@@ -392,13 +392,14 @@ def fanTiXianTime(t_time):
             if not now_user:
                 return JsonResponse({'valid': False, 'message': '用户不存在'})
             # 得到用户token表
-            # now_userToken = now_user.usertoken_set.first()     # type: Optional[userToken] 
-            # if  not now_userToken: 
-            #     return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
+            now_userToken = now_user.usertoken_set.first()     # type: Optional[userToken] 
+            if  not now_userToken: 
+                return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
             
             # 用户返款
-            now_user.fanHuan+=t_payToken.amount
-            now_user.save()
+            now_userToken.jzToken+=t_payToken.amount
+            # now_user.fanHuan+=t_payToken.amount
+            now_userToken.save()
             t_payToken.status=1 #返还 提现
             t_payToken.Remark+='-提现退回'
             t_payToken.save() 

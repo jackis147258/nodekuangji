@@ -259,8 +259,8 @@ class ebcPayTokenView(viewsets.ModelViewSet):
         filter_conditions = {}
         if userid_param is not None:
             filter_conditions['uidB'] = userid_param
-        if layer_param is not None:
-            filter_conditions['Layer'] = layer_param
+        # if layer_param is not None:
+        #     filter_conditions['Layer'] = layer_param
         if status_param is not None:
             filter_conditions['status'] = status_param
 

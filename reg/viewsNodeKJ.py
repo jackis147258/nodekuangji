@@ -295,7 +295,12 @@ def buynodeKJUsdt(request):
         return JsonResponse({'valid': False, 'message':'用户余额不足'}) 
     # 
 
+    if now_user.bestMaxKuangJi>=number:
+        return JsonResponse({'valid': False, 'message': '不能质押小于'+str(number)+'的矿机'})
+
    
+
+
     try:
         with transaction.atomic():
 
@@ -328,6 +333,25 @@ def buynodeKJUsdt(request):
             # 增加奖金池奖金
             # now_userToken.jzToken+=t_jj10                 
             now_userToken.save()
+
+            # 增加个人业绩            
+            now_user.selfYeJi+=number
+            now_user.save()
+                # 写入记录     
+            t_ebcJiaSuShouYiJiLu=ebcJiaSuShouYiJiLu ()
+            t_ebcJiaSuShouYiJiLu.uidA=0   #发送方
+            t_ebcJiaSuShouYiJiLu.uidB=now_user.id  # 接收方
+            t_ebcJiaSuShouYiJiLu.status=1  #已转
+            t_ebcJiaSuShouYiJiLu.Layer=1  # 0充值 1 代数 2 层数 
+            t_ebcJiaSuShouYiJiLu.fanHuan=number
+            t_ebcJiaSuShouYiJiLu.Remark='个人业绩增加:'+str(number)      #'返4.5%'    
+            t_ebcJiaSuShouYiJiLu.save()   
+            
+            # 更新用户最大矿机数
+            if number >now_user.bestMaxKuangJi:
+                now_user.bestMaxKuangJi=number
+                now_user.save()
+
             # 需要处理 奖金日志
             # if isjj:
             #     # 写入记录 得到 10% 奖金池
@@ -398,7 +422,7 @@ def buynodeKJUsdt(request):
 
             children_count = parentUser.get_children().count()  
             # 看是否满足返还条件 存在一个直推用户
-            if children_count>1 :
+            if True :
                 t_tiCheng=number*0.1
                 parentUser_userToken.usdtToken+=t_tiCheng  
                 parentUser_userToken.save() 
@@ -420,12 +444,16 @@ def buynodeKJUsdt(request):
                 now_webid = webInfo.objects.filter(webid=3).first()    
                 t_FanUsdt=number*0.05 #5% 作为分润
                 # t_FanUsdt 转为 amt  0.1 为amt 价格
-                t_amtPrice=t_FanUsdt
-                now_webid.jiangJinChi=now_webid.jiangJinChi+t_amtPrice
+
+                latest_price = redis_client.get('token_price') 
+                amtLirun=t_FanUsdt/float(latest_price)
+                amtLirun_rounded = round(amtLirun, 2)
+
+                now_webid.jiangJinChi=now_webid.jiangJinChi+amtLirun_rounded
                 now_webid.save() 
 
             # 团队业绩记录
-            t_backStr=TDyeJi(now_user,number)
+            t_backStr=TDyeJi(now_user)
  
         # isOk,message=nodeKjFenRun.userFenRun(now_user,new_tokenZhiYaJiShi.number,0,nodes_att_daily_rate['nodeKJ'+str(kuangji)])
         # if isOk:
@@ -888,6 +916,8 @@ def getKJDayFanHuan(request):
         # t_jiasu15=0
         t_kuangJi.uTime=t_kuangJi.uTime+int(one_day_timestamp)
         t_kuangJi.amountShouYi+=t_liRun
+        # 添加点击次数
+        t_kuangJi.dianJiCiShu+=1
         t_kuangJi.save()
 
     #    加入用户 token 账户  jz 本项目代币AMT   t_liRun 折算成 AMT 
@@ -973,9 +1003,17 @@ def generate_signature(request):
         # if amount10 > now_userToken.jzToken:
         #     return JsonResponse({'valid': False, 'message': '余额不足'}) 
 
-        amount10 = float(amount) / (10 ** 18)
-        if amount10 > float(now_user.fanHuan):
-            return JsonResponse({'valid': False, 'message': '可返还余额不足'}) 
+        if layer==1: # usdt 
+            amount10 = float(amount) / (10 ** 6)
+            # if amount10 > float(now_user.fanHuan):
+            if amount10 > float(now_userToken.usdtToken):
+                return JsonResponse({'valid': False, 'message': '可返还余额不足USDT'}) 
+
+        if layer==2: # amt 
+            amount10 = float(amount) / (10 ** 18)
+            # if amount10 > float(now_user.fanHuan):
+            if amount10 > float(now_userToken.jzToken):
+                return JsonResponse({'valid': False, 'message': '可返还余额不足AMT'}) 
 
 
 
@@ -1168,13 +1206,16 @@ def fanTiXian(request):
         if not now_user:
             return JsonResponse({'valid': False, 'message': '用户不存在'})
         # 得到用户token表
-        # now_userToken = now_user.usertoken_set.first()     # type: Optional[userToken] 
-        # if  not now_userToken: 
-        #     return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
+        now_userToken = now_user.usertoken_set.first()     # type: Optional[userToken] 
+        if  not now_userToken: 
+            return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
         
         # 用户返款
-        now_user.fanHuan+=t_payToken.amount
-        now_user.save()
+        # now_user.fanHuan+=t_payToken.amount
+        # now_user.save()
+
+        now_userToken.jzToken+=t_payToken.amount
+        now_userToken.save()
         t_payToken.status=1 #返还 提现
         t_payToken.Remark+='-提现退回'
         t_payToken.save()

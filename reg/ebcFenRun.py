@@ -479,16 +479,25 @@ def tuanDuiRenShu(username):
             # 提取用户集合的名字
             # children_names = [child.username for child in children if child.status == 1]              
             # children_names = [child.username for child in children ]  
+             
             children_names = [
-                (child.username, "已开挖" if child.cengShu >=2 else "未挖矿") 
+                (child.username, "团队等级:"+str(child.tuanduiLevel) ) 
                 for child in children
-            ]            
+            ]           
+            # children_names = [
+            #     (child.username, "已开挖" if child.cengShu >=2 else "未挖矿") 
+            #     for child in children
+            # ]            
             children_count = user.get_children().count()   
             # 获得全部后代人数
             get_descendants = user.get_descendants()     
             # 提取用户集合的名字          
+            # descendants_names = [
+            #     (child.username, "已开挖" if child.cengShu >=2 else "未挖矿") 
+            #     for child in get_descendants
+            # ]
             descendants_names = [
-                (child.username, "已开挖" if child.cengShu >=2 else "未挖矿") 
+                (child.username, "团队等级:"+str(child.tuanduiLevel)) 
                 for child in get_descendants
             ]
             get_descendants_count=user.get_descendants().count()

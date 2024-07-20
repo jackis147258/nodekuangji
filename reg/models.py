@@ -57,6 +57,11 @@ class CustomUser(MPTTModel, AbstractUser):
     TDallAmount= models.FloatField(db_comment='团队总值',verbose_name="团队总值", blank=True, null=True,default=0)
 
     TDxiaoQuAmount= models.FloatField(db_comment='团队小区总值',verbose_name="团队小区总值", blank=True, null=True,default=0)
+    
+    bestMaxKuangJi= models.FloatField(db_comment='质押最大矿机',verbose_name="质押最大矿机", blank=True, null=True,default=0)
+    selfYeJi= models.FloatField(db_comment='个人投入',verbose_name="个人投入", blank=True, null=True,default=0)
+
+
 
 
 
@@ -96,7 +101,7 @@ class CustomUser(MPTTModel, AbstractUser):
 
 
 
-# Layer= 0充值 1 代数 2 层数 3 #提现到账 日志  8.提现记录
+# Layer= 0充值 1 代数 2 层数 3 #提现到账 日志 4 燃料包 5. 分红日志  8.提现记录
 class ebcJiaSuShouYiJiLu(models.Model):  
     uidA = models.FloatField(db_comment='用户A-发送方', verbose_name="用户A-发送方", blank=True, null=True, default=0.0)
     uidB = models.FloatField(db_comment='用户B-接收方',verbose_name="用户B-接收方", blank=True, null=True,default=0) 
@@ -155,6 +160,9 @@ class tokenZhiYaJiShi(models.Model):
     amountType = models.CharField(verbose_name="质押类型",max_length=255,blank=True, null=True, db_comment='质押类型')
 
     amountShouYi= models.FloatField(db_comment='质押收益',verbose_name="质押收益",  blank=True, null=True)
+
+    dianJiCiShu = models.IntegerField(db_comment='被点击次数',choices=status_choices,default=0)    
+
 
     @staticmethod
     def get_kuangjiList_by_uid(t_user):

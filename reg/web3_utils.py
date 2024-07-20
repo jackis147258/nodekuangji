@@ -66,7 +66,7 @@ class Web3Client:
         return event_list
 
 
-def format_token_amount(raw_amount, decimals=18):
+def format_token_amount(raw_amount, decimals=6):
     # 将字符串转换为浮点数，并应用小数位转换
     formatted_amount = float(raw_amount) / (10 ** decimals)
     # 返回格式化后的数值，保留两位小数
@@ -105,7 +105,7 @@ def process_deposit_event(event_list):
                     continue
                 #记录  添加余额   // layer==0  冲 usdt  1  yl   2 jz
                 t_Remark='充值**'
-                amount10=float(format_token_amount(event_data['amount']))
+                amount10=float(format_token_amount(event_data['amount'],6))
                 # 充值
                 if event_data['layer']==0:
                     now_userToken.usdtToken+=amount10

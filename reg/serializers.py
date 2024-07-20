@@ -39,7 +39,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         # fields = '__all__'
-        fields = ("id","username", "userStakesA","userStakesB", "userStakesBfanHuan", "fanHuan","EbcCreated_at", "EbcLastFanHuan_at", "status", "parent","kapaiLevel","userLevel","tuanduiLevel","kapaiA","kapaiB","kapaiC","cengShu","tokenNum" ,"TDxiaoQuAmount",)
+        fields = ("id","username", "userStakesA","userStakesB", "userStakesBfanHuan", "fanHuan","EbcCreated_at", "EbcLastFanHuan_at", "status", "parent","kapaiLevel","userLevel","tuanduiLevel","kapaiA","kapaiB","kapaiC","cengShu","tokenNum" ,"TDxiaoQuAmount","TDallAmount",)
 
 
     def get_tokenNum(self, obj):
@@ -105,7 +105,7 @@ class tokenZhiYaJiShiSerializer(serializers.ModelSerializer):
     class Meta:
         model = tokenZhiYaJiShi
         # fields = '__all__'
-        fields = ('id','tokenName','number','zhiYaTime' ,'kaiShiTime','status','uid' ,'Remark','uTime','amount' ,'amountType',)        
+        fields = ('id','tokenName','number','zhiYaTime' ,'kaiShiTime','status','uid' ,'Remark','uTime','amount' ,'amountType','dianJiCiShu')        
         
     def get_status(self, obj):
         # 将整数状态映射到相应的字符串表示
