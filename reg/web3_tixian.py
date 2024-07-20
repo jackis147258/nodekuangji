@@ -22,7 +22,7 @@ class Web3TiXian:
     def __init__(self):
         # 0x9E5993a7D9af815216810680e0a319491C263B46   0x779732DC4aa3Bf415a0D1435e919BcAF5a9210E7
         # pancakeRouterAddress = config('EbcState_ADDRESS', default='')         
-        pancakeRouterAddress = '0x7c21Ab3Be1c9d8491eEac6311DaFe4b9577cfCd4'
+        pancakeRouterAddress = '0xDc960976690F925789055701CC8AFD856bf81633'
         self.EbcStateADDRESS = pancakeRouterAddress
 
         pancakeAbi = tokenAbi(pancakeRouterAddress)  # 合约 ABI 

@@ -48,7 +48,6 @@ import asyncio
 from django.contrib.auth import get_user_model
 User = get_user_model()
 
-import redis
 
 from django.http import JsonResponse
 # from django_redis import get_redis_connection
@@ -79,6 +78,12 @@ from .decorators import with_lang
 
 from .utils import get_message
 from .nodeKjSheQu import TDyeJi
+
+import redis
+
+redis_client = redis.StrictRedis(host='localhost', port=6379, db=4)
+# latest_price = redis_client.get('token_price')  
+
 # 导入必要的模块
 
 # 矿机属性饲养周期
@@ -337,6 +342,12 @@ def buynodeKJUsdt(request):
             #     )
 
 
+            # day30_timestamp = 24 * 60 * 60 *30 #30天
+            # print(one_day_timestamp)
+            # t_jiasu15=0
+            # t_kuangJi.uTime=t_kuangJi.uTime+int(one_day_timestamp)
+
+
             # 记录质押矿机 信息
             new_tokenZhiYaJiShi =tokenZhiYaJiShi.objects.create(
                 tokenName='质押usdt'+str(number),
@@ -349,6 +360,7 @@ def buynodeKJUsdt(request):
                 uid=now_user,
                 zhiYaTime=int(timedelta(days=150).total_seconds())   ,     #质押时间
                 kaiShiTime=int(timezone.now().timestamp()),#质押开始时间
+                # uTime=int(timezone.now().timestamp())+day30_timestamp,#质押更新时间
                 uTime=int(timezone.now().timestamp()),#质押更新时间
                 # Remark=str(now_user.id)+'质押usdt,直推人数:'+str(qualified_children_count)
                 Remark=str(now_user.id)+'质押usdt'
@@ -798,7 +810,7 @@ class userTokenZhiYaJiShiListView(viewsets.ModelViewSet):
     
 
 
-#矿机得到 当日返还
+#矿机得到 30天返还一次
 @api_view(["POST"])
 @with_lang
 
@@ -870,15 +882,21 @@ def getKJDayFanHuan(request):
             t_kuangJi.amountShouYi+=t_liRun
             t_kuangJi.save()
             return JsonResponse({'valid': False, 'message': '矿机质押到期请重新质押'}) 
-        one_day_timestamp = 24 * 60 * 60
+        # one_day_timestamp = 24 * 60 * 60 *30 #30天
+        one_day_timestamp = 24 * 60 * 60  #30天
         print(one_day_timestamp)
         # t_jiasu15=0
         t_kuangJi.uTime=t_kuangJi.uTime+int(one_day_timestamp)
         t_kuangJi.amountShouYi+=t_liRun
         t_kuangJi.save()
 
-    #    加入用户 token 账户  jz 本项目代币AMT
-        now_userToken.jzToken+=t_liRun  
+    #    加入用户 token 账户  jz 本项目代币AMT   t_liRun 折算成 AMT 
+
+        latest_price = redis_client.get('token_price') 
+        amtLirun=t_liRun/float(latest_price)
+        amtLirun_rounded = round(amtLirun, 2)
+
+        now_userToken.jzToken+=amtLirun_rounded  
         now_userToken.save()
 # 加入用户返还
         # now_user.fanHuan+=t_liRun        
@@ -995,8 +1013,11 @@ def generate_signature(request):
             now_userToken.save()
         # 扣费 amt 的 fanhuan 部分
         if layer==2:
-            now_user.fanHuan-=amount10
-            now_user.save()
+            now_userToken.jzToken-=amount10
+            now_userToken.save()
+
+            # now_user.fanHuan-=amount10
+            # now_user.save()
         # now_userToken.jzToken-=amount10
         # now_userToken.save()
         # 10% 记录到 奖金池

@@ -2,7 +2,8 @@ import requests
 from bs4 import BeautifulSoup
 
 # 目标页面URL
-url = 'https://coinmarketcap.com/dexscan/zh/polygon/0x2e6ee934c0bb2a8446c50acef58e9caa47a39dcd/'
+# url = 'https://coinmarketcap.com/dexscan/zh/polygon/0x2e6ee934c0bb2a8446c50acef58e9caa47a39dcd/'
+url = 'https://ave.ai/token/0x4339e7c4d7c9495c704bc7818b2032f4b72c8dd9-polygon?from=Home'
 
 # 发出请求
 response = requests.get(url)

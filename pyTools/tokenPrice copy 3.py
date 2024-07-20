@@ -25,7 +25,7 @@ headers = {
 }
 
 # Token contract address
-contract_address = '0x2e6ee934c0bb2a8446c50acef58e9caa47a39dcd'
+contract_address = '0x4339e7C4D7C9495c704BC7818b2032F4b72c8dD9'
 chain_id = 0  # Polygon chain ID
 
 # URL for querying token price

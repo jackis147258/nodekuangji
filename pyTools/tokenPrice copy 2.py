@@ -8,7 +8,7 @@ headers = {
 }
 
 # 目标合约地址
-contract_address = '0x4339e7C4D7C9495c704BC7818b2032F4b72c8dD9'
+contract_address = '0x2E6Ee934c0bB2a8446C50acEf58e9caa47a39DCD'
 
 # 查找合约地址相关信息的URL
 url_info = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/info'

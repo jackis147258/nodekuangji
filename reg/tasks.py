@@ -20,8 +20,7 @@ from .web3_utils import Web3Client,listen_to_deposit_events
 from .web3_tixian import listen_to_Withdrawal_events
 from .nodeKjFenRun import fanTiXianTime
 from .nodeKjSheQu import  sheQuFenRun
-
-
+from .web3_Price import getPrice
 @shared_task
 def listen_toDeposit ():
     listen_to_deposit_events()
@@ -42,3 +41,9 @@ def fanTiXianTimeTask (t_house):
 @shared_task
 def sheQuFenRunTask ():
     sheQuFenRun()
+
+
+#amt 实时价格
+@shared_task
+def tokenPrice ():
+    getPrice()

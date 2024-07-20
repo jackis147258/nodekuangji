@@ -53,15 +53,16 @@ def sheQuFenRun():  # amount 分润基数  layer 类型0 矿机质押  1 每日�
 
             # 3. 计算每个用户应得的分润数量
             # user_count = users_with_high_tdxiaoqu_amount.count()
-            if tuandui_level_counts > 0:
-                per_user_fenRun = t_fenRunNumber / tuandui_level_counts
+            if tuandui_level_sum > 0:
+                per_user_fenRun = t_fenRunNumber / tuandui_level_sum
             else:
                 per_user_fenRun = 0
             # 输出用户集合
             for t_user in users_with_high_tdxiaoqu_amount:
                 # print(f"用户名: {user.username}, TDxiaoQuAmount: {user.TDxiaoQuAmount}")
+                t_fenRunAll=t_user.tuanduiLevel*per_user_fenRun
                 now_userToken = t_user.usertoken_set.first()     # type: Optional[userToken] 
-                now_userToken.usdtToken+=t_user.tuanduiLevel*per_user_fenRun 
+                now_userToken.usdtToken+=t_fenRunAll 
                 now_userToken.save()
                 # 写入记录     
                 t_ebcJiaSuShouYiJiLu=ebcJiaSuShouYiJiLu ()
@@ -69,7 +70,7 @@ def sheQuFenRun():  # amount 分润基数  layer 类型0 矿机质押  1 每日�
                 t_ebcJiaSuShouYiJiLu.uidB=t_user.id  # 接收方
                 t_ebcJiaSuShouYiJiLu.status=1  #已转
                 t_ebcJiaSuShouYiJiLu.Layer=1  # 0充值 1 代数 2 层数 
-                t_ebcJiaSuShouYiJiLu.fanHuan=per_user_fenRun
+                t_ebcJiaSuShouYiJiLu.fanHuan=t_fenRunAll
                 t_ebcJiaSuShouYiJiLu.Remark='社区奖励'+str(per_user_fenRun)      #'返4.5%'    
                 t_ebcJiaSuShouYiJiLu.save()   
 
