@@ -83,7 +83,7 @@ def taskQuantify(self,id):
 
 
 @shared_task
-def mul(x, y):
+def mul(x=1, y=3):
     print(x * y)
     return x * y
 

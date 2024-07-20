@@ -54,12 +54,14 @@ class CustomUser(MPTTModel, AbstractUser):
 
     zhiTuiNum = models.IntegerField(db_comment='暂存直推人数',blank=True, null=True,default=0)
 
-    TDallAmount= models.FloatField(db_comment='团队总值',verbose_name="团队总值", blank=True, null=True,default=0)
+    TDallAmount= models.FloatField(db_comment='团队大区总值',verbose_name="团队大区总值", blank=True, null=True,default=0)
 
     TDxiaoQuAmount= models.FloatField(db_comment='团队小区总值',verbose_name="团队小区总值", blank=True, null=True,default=0)
     
     bestMaxKuangJi= models.FloatField(db_comment='质押最大矿机',verbose_name="质押最大矿机", blank=True, null=True,default=0)
     selfYeJi= models.FloatField(db_comment='个人投入',verbose_name="个人投入", blank=True, null=True,default=0)
+    TDallInAmount= models.FloatField(db_comment='团队全部总值',verbose_name="团队全部总值", blank=True, null=True,default=0)
+
 
 
 

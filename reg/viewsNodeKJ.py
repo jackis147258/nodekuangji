@@ -336,6 +336,8 @@ def buynodeKJUsdt(request):
 
             # 增加个人业绩            
             now_user.selfYeJi+=number
+              #  t_user 增加总业绩
+            now_user.TDallInAmount+=number   # type: Optional[CustomUser] 
             now_user.save()
                 # 写入记录     
             t_ebcJiaSuShouYiJiLu=ebcJiaSuShouYiJiLu ()
@@ -344,7 +346,7 @@ def buynodeKJUsdt(request):
             t_ebcJiaSuShouYiJiLu.status=1  #已转
             t_ebcJiaSuShouYiJiLu.Layer=1  # 0充值 1 代数 2 层数 
             t_ebcJiaSuShouYiJiLu.fanHuan=number
-            t_ebcJiaSuShouYiJiLu.Remark='个人业绩增加:'+str(number)      #'返4.5%'    
+            t_ebcJiaSuShouYiJiLu.Remark='个人总业绩和团队总业绩增加:'+str(number)      #'返4.5%'    
             t_ebcJiaSuShouYiJiLu.save()   
             
             # 更新用户最大矿机数
@@ -453,7 +455,7 @@ def buynodeKJUsdt(request):
                 now_webid.save() 
 
             # 团队业绩记录
-            t_backStr=TDyeJi(now_user)
+            t_backStr=TDyeJi(now_user,number)
  
         # isOk,message=nodeKjFenRun.userFenRun(now_user,new_tokenZhiYaJiShi.number,0,nodes_att_daily_rate['nodeKJ'+str(kuangji)])
         # if isOk:

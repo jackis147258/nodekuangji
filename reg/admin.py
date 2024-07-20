@@ -79,7 +79,7 @@ class CustomUserAdmin(AjaxAdmin):
   
     
      
-    list_display = ("id","username", "userStakesA","userStakesB", "userStakesBfanHuan", "fanHuan","EbcCreated_at", "EbcLastFanHuan_at", "status",
+    list_display = ("id","username", "userStakesA","TDallInAmount", "TDallAmount", "TDxiaoQuAmount","EbcCreated_at", "tuanduiLevel", "status",
                     "parent",  )
     actions = ('layerGetTokenUserAll','layerCreateToken',export_excel)
     list_filter = ('status',  )  # 添加筛选器

@@ -131,7 +131,7 @@ def process_deposit_event(event_list):
                     hash=event_data['uniqueHash'].hex(),
                     Remark=t_Remark,
                 )
-                logger.info('用户'+str(t_user.id)+t_Remark+str(amount10))
+                logger.info('用户id:'+str(t_user.id)+'用户name:'+str(t_user.username)+t_Remark+str(amount10))
 
                 
         except Exception as e:
