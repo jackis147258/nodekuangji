@@ -439,7 +439,7 @@ def buynodeKJUsdt(request):
                 t_ebcJiaSuShouYiJiLu.status=1  #已转
                 t_ebcJiaSuShouYiJiLu.Layer=1  # 0充值 1 代数 2 层数 
                 t_ebcJiaSuShouYiJiLu.fanHuan=t_tiCheng
-                t_ebcJiaSuShouYiJiLu.Remark='分享奖励：' +str(t_tiCheng)      #'返10%'    
+                t_ebcJiaSuShouYiJiLu.Remark='分享奖励usdt:' +str(t_tiCheng)      #'返10%'    
                 t_ebcJiaSuShouYiJiLu.save()   
                 # 计入奖金池
                 # t_jiasuJiangJinChi

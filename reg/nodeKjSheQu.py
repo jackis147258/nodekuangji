@@ -39,7 +39,7 @@ def sheQuFenRun():  # amount 分润基数  layer 类型0 矿机质押  1 每日�
             users_with_high_tdxiaoqu_amount = CustomUser.objects.filter(
                 Q(TDxiaoQuAmount__gte=30000)  
             ).exclude(
-                Q(username='0x606adb6c2b7d415e0fd58b7d9cff6b71e5139ceb') | Q(username='0x606adb6c2b7d415e0fd58b7d9cff6b71e5139ceb')| Q(username='admin1')
+                Q(username='0x606adb6c2b7d415e0fd58b7d9cff6b71e5139ceb') | Q(username='0x8b1a82fa7d895f041854607f613160e216c060d')| Q(username='admin1')
             )
             if users_with_high_tdxiaoqu_amount is None:
                 now_webid.jiangJinChi =0

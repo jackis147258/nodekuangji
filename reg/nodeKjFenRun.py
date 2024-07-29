@@ -397,13 +397,19 @@ def fanTiXianTime(t_time):
                 return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
             
             # 用户返款
-            now_userToken.jzToken+=t_payToken.amount
+            #判断 提现类型 layer=1=usdt    2=Amt
+            if t_payToken.Layer==1:
+                now_userToken.usdtToken+=t_payToken.amount
+            if t_payToken.Layer==2:
+                now_userToken.jzToken+=t_payToken.amount
+            if t_payToken.Layer==3:
+                now_userToken.jzToken+=t_payToken.amount
             # now_user.fanHuan+=t_payToken.amount
             now_userToken.save()
             t_payToken.status=1 #返还 提现
             t_payToken.Remark+='-提现退回'
             t_payToken.save() 
-            logger.info('反提现'+str(now_user.id)+' name:' +now_user.username+'amount:'+str(t_payToken.amount))        
+            logger.info('反提现'+str(now_user.id)+' name:' +now_user.username+'amount:'+str(t_payToken.amount)+'提币类型'+str(t_payToken.Layer))        
 
     except Exception as e:  
         # self.buyTokensBuildTransaction() # 下一次购买准备
