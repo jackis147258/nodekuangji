@@ -62,6 +62,9 @@ class CustomUser(MPTTModel, AbstractUser):
     selfYeJi= models.FloatField(db_comment='个人投入',verbose_name="个人投入", blank=True, null=True,default=0)
     TDallInAmount= models.FloatField(db_comment='团队全部总值',verbose_name="团队全部总值", blank=True, null=True,default=0)
 
+    tuanduiLevelName = models.CharField(verbose_name="团队等级名称",max_length=255,blank=True, null=True, db_comment='团队等级名称')
+
+
 
 
 

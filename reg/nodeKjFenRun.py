@@ -377,7 +377,11 @@ def fanTiXianTime(t_time):
 
     try:
     #    with transaction.atomic(): 
-        specified_time = timezone.now() - timezone.timedelta(hours=int(t_time))  # 例如，1小时  days 是一天
+        # specified_time = timezone.now() - timezone.timedelta(hours=int(t_time))  # 例如，1小时  days 是一天
+
+        specified_time = timezone.now() - timezone.timedelta(minutes=int(t_time))  # 例如，20分钟  
+
+        
             # 查询符合条件的 payToken 记录
         pay_tokens = payToken.objects.filter(
             Q(created_at__lt=specified_time) & Q(status=0)

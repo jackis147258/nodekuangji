@@ -4,19 +4,19 @@
     // 欲了解更多信息，请访问: https://go.microsoft.com/fwlink/?linkid=830387
     "version": "0.2.0",
     "configurations": [ 
-    {
-        "name": "Daphne1",
-        "type": "python",
-        "request": "launch",
-        "program": "${workspaceFolder}/venv/bin/daphne",
-        "args": [
-            "-b0.0.0.0",
-            // "-b127.0.0.1",
-            // "-p9003",
-            "-p9007",
-            "moon39.asgi:application"
-        ],
-    },
+        {
+            "name": "Daphne1",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/venv/bin/daphne",
+            "args": [
+                "-b0.0.0.0",
+                // "-b127.0.0.1",
+                // "-p9003",
+                "-p9007",
+                "moon39.asgi:application"
+            ],
+        },
               {
             "name": "Django: Daphne",
             "type": "python",
@@ -24,7 +24,7 @@
             "program": "daphne",
             "args": [
                 "runserver",
-                "-p 7002",
+                "-p 9007",
                 "moon39.asgi:application",
               
             ],
@@ -41,7 +41,7 @@
             "program": "${workspaceFolder}/manage.py",
             "args": [
                 "runserver",
-                "7001"
+                "9007"
             ],
             "django": true,
             "justMyCode": true

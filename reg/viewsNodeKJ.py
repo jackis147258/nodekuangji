@@ -425,7 +425,7 @@ def buynodeKJUsdt(request):
             children_count = parentUser.get_children().count()  
             # 看是否满足返还条件 存在一个直推用户
             if True :
-                t_tiCheng=number*0.1
+                t_tiCheng=number*0.1 #直推 拿10%
                 parentUser_userToken.usdtToken+=t_tiCheng  
                 parentUser_userToken.save() 
 

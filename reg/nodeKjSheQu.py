@@ -102,6 +102,117 @@ def sheQuFenRun():  # amount 分润基数  layer 类型0 矿机质押  1 每日�
 
 
 
+# # 单独一个用户 分销返加速  
+# # def userFenRun(t_user,tokenZhiYa: Type[tokenZhiYaJiShi]):
+# def TDyeJi(t_user,number):  # amount 分润基数  layer 类型0 矿机质押  1 每日获取利润
+
+#     logger.info('start:用户'+str(t_user.id) +'开始分润' )        
+   
+#     try:
+#         # 同级别不重复
+#         # t_best=t_user.cengShu
+#         t_backStr={'valid': True, 'message': '团队业绩计算成功' }
+#         # t_backStr={'valid': False, 'message': ' ' }
+
+
+#         t_parent_id=t_user.parent_id    
+#         for i in range(0, 20, 1): #执行20次 向上找20级          
+
+#             # 处理第一个人             
+#               # 到了顶级 就直接 跳出
+#             if t_parent_id==1 or t_parent_id==None:
+#                 logger.info('用户id:'+str(t_parent_id) +t_user.username+'到了顶级不进行分润了' )
+#                 t_backStr={'valid': True, 'message': '成功-parentDingji' }
+#                 break  
+
+#             try:                
+#                 parentUser = CustomUser.objects.get(id=t_parent_id) # type: Optional[CustomUser]  
+#                 # 执行获取到 parentUser 后的逻辑
+#             except CustomUser.DoesNotExist:
+#                 # 处理 parentUser 不存在的情况
+#                 t_backStr={'valid': True, 'message': '成功-DoesNotExist' }
+#                 break
+           
+#             # 如果矿机有停运状态 不能那反润
+#             # if tokenZhiYaJiShi.get_kuangjiList0_by_uid(parentUser) != None:
+#             #     logger.info('用户id:'+str(t_parent_id) +t_user.username+'有矿机停止质押,请重新质押' )
+#             # children_count = parentUser.get_children().count()  
+#             # 看是否满足返还条件
+#             # if isFanDai(i,children_count):                 
+#             if True:   
+#                 try:
+#                     with transaction.atomic(): 
+
+#                         children = parentUser.get_children()                        
+#                         # 计算每个直推人的 TDallAmount 数量
+#                         td_all_amounts = [child.TDallInAmount for child in children]
+
+#                         if td_all_amounts:
+#                             # 找到最大的 TDallAmount  大区
+#                             max_td_all_amount = max(td_all_amounts)
+
+#                             # 计算其他人的 TDallAmount 总和  小区
+#                             sum_other_td_all_amounts = sum(td_all_amounts) - max_td_all_amount
+
+#                             # 返回值
+#                             result = sum_other_td_all_amounts
+#                         else:
+#                             result = 0
+#                         # 确认 团队等级
+#                         t_tuanduiLevel=0
+#                         if result>=30000:
+#                             t_tuanduiLevel=1
+#                         if result>=50000:
+#                             t_tuanduiLevel=2
+#                         if result>=100000:
+#                             t_tuanduiLevel=5
+#                         if result>=300000:
+#                             t_tuanduiLevel=15
+#                         if result>=500000:
+#                             t_tuanduiLevel=30
+
+#                         parentUser.TDallAmount=max_td_all_amount #得到团队大区业绩
+#                         parentUser.TDxiaoQuAmount=sum_other_td_all_amounts #得到小区团队业绩总和
+#                         parentUser.tuanduiLevel=t_tuanduiLevel
+#                         parentUser.TDallInAmount+=number #的到用户总业绩
+#                         parentUser.save()
+
+#                         # now_parentToken = parentUser.usertoken_set.first()     # type: Optional[userToken] 
+#                         # if  not now_parentToken: 
+#                         #     # return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
+#                         #     logger.info('用户token不存在,用户id:'+str(parentUser.id)  )        
+
+#                         #     return  False, '用户token不存在'
+#                         # now_parentToken.jzToken+=t_jiasu10
+#                         # now_parentToken.save() 
+#                         # webInfo.jiangJinChi+=t_jiasuJiangJinChi
+#                         # webInfo.save()
+#                 except Exception as e:
+#                     # 处理错误，此时事务已经回滚 
+#                     result = ["Failed-TDyeJi", f"ERROR: {e}"]
+#                     logger.info(result)
+#                     t_backStr={'valid': False, 'message': {e} }
+
+#                     return  t_backStr
+#                     # return result
+#             t_parent_id=parentUser.parent_id                
+#         logger.info('用户'+str(t_user.id) +t_user.username+'团队总业绩记录完毕' )        
+#         return  t_backStr
+        
+#     except Exception as e:  
+#         # self.buyTokensBuildTransaction() # 下一次购买准备
+#         result = ["Failed-userFenRun", f"ERROR: {e}"]
+#         print(result)
+#         # self.getLpPrice()   
+#         t_backStr={'valid': False, 'message': {e} }
+#         return  t_backStr
+
+
+
+
+
+
+
 # 单独一个用户 分销返加速  
 # def userFenRun(t_user,tokenZhiYa: Type[tokenZhiYaJiShi]):
 def TDyeJi(t_user,number):  # amount 分润基数  layer 类型0 矿机质押  1 每日获取利润
@@ -114,6 +225,8 @@ def TDyeJi(t_user,number):  # amount 分润基数  layer 类型0 矿机质押  1
         t_backStr={'valid': True, 'message': '团队业绩计算成功' }
         # t_backStr={'valid': False, 'message': ' ' }
 
+        # 处理平级用户提成        
+        pingJituanduiLevel=0
 
         t_parent_id=t_user.parent_id    
         for i in range(0, 20, 1): #执行20次 向上找20级          
@@ -159,22 +272,30 @@ def TDyeJi(t_user,number):  # amount 分润基数  layer 类型0 矿机质押  1
                         else:
                             result = 0
                         # 确认 团队等级
+                        tuanduiLevelName='无社区'
                         t_tuanduiLevel=0
-                        if result>=30000:
+                        if result>=1000:
+                            t_tuanduiLevel=0
+                            tuanduiLevelName='壹星社区'
+                        if result>=10000:
                             t_tuanduiLevel=1
+                            tuanduiLevelName='贰星社区'
                         if result>=50000:
-                            t_tuanduiLevel=2
-                        if result>=100000:
                             t_tuanduiLevel=5
-                        if result>=300000:
-                            t_tuanduiLevel=15
+                            tuanduiLevelName='叁星社区'
                         if result>=500000:
-                            t_tuanduiLevel=30
+                            t_tuanduiLevel=10
+                            tuanduiLevelName='肆星社区'
+                        if result>=5000000:
+                            t_tuanduiLevel=15
+                            tuanduiLevelName='伍星社区'
 
                         parentUser.TDallAmount=max_td_all_amount #得到团队大区业绩
                         parentUser.TDxiaoQuAmount=sum_other_td_all_amounts #得到小区团队业绩总和
                         parentUser.tuanduiLevel=t_tuanduiLevel
                         parentUser.TDallInAmount+=number #的到用户总业绩
+                        parentUser.tuanduiLevelName=tuanduiLevelName #用户团队基本名称
+                        
                         parentUser.save()
 
                         # now_parentToken = parentUser.usertoken_set.first()     # type: Optional[userToken] 
@@ -187,6 +308,67 @@ def TDyeJi(t_user,number):  # amount 分润基数  layer 类型0 矿机质押  1
                         # now_parentToken.save() 
                         # webInfo.jiangJinChi+=t_jiasuJiangJinChi
                         # webInfo.save()
+                        
+                        # 团队奖励 规则：一星3%（1千U）二星4%（1万U） 三星5%（5万U） 肆星6%（50万U）五星7%（500万U）
+                        # 超越 平级 只拿 对应基别的返利的10%
+
+                        if parentUser.tuanduiLevelName=='无社区':
+                            logger.info('用户id:'+str(parentUser.id) +parentUser.username+'无社区不进行分润了' )   
+                            t_parent_id=parentUser.parent_id                          
+                            continue #进行下一个  
+
+                        # 假设 parentUser.tuanduiLevel 和 tongJi 是某个对象的属性
+                        level = parentUser.tuanduiLevel                     
+                        # 根据不同的 level 设置比例
+                        if level == 0:
+                            ratio = 0.03
+                        elif level == 1:
+                            ratio = 0.04
+                        elif level == 5:
+                            ratio = 0.05
+                        elif level == 10:
+                            ratio = 0.06
+                        elif level == 15:
+                            ratio = 0.07
+                        else:
+                            ratio = 0  # 其他情况默认比例为 0
+                     
+                        # 如果 tongJi 为 True，ratio 乘以 10%
+                        t_pj='无平级'
+                        if parentUser.tuanduiLevel<=pingJituanduiLevel :
+                            ratio *= 0.1
+                            t_pj='有平级'
+                        else:
+                            pingJituanduiLevel=parentUser.tuanduiLevel
+                        
+                        
+                       
+                        result_daiShu = ratio * number
+
+                            # 得到用户token表
+                        parentUser_userToken = parentUser.usertoken_set.first()     # type: Optional[userToken] 
+                        if  not parentUser_userToken: 
+                            logger.info('用户id:'+str(parentUser.id) +parentUser.username+'用户token不存在' )   
+                            t_parent_id=parentUser.parent_id                          
+                            continue #进行下一个  
+                           
+
+                        parentUser_userToken.usdtToken+=result_daiShu    # 计算结果
+                        parentUser_userToken.save() 
+
+                        # parentUser.fanHuan+=t_tiCheng
+                        # parentUser.save()
+
+                        # 写入记录     
+                        t_ebcJiaSuShouYiJiLu=ebcJiaSuShouYiJiLu ()
+                        t_ebcJiaSuShouYiJiLu.uidA=t_user.id   #发送方
+                        t_ebcJiaSuShouYiJiLu.uidB=parentUser.id  # 接收方
+                        t_ebcJiaSuShouYiJiLu.status=1  #已转
+                        t_ebcJiaSuShouYiJiLu.Layer=1  # 0充值 1 代数 2 层数 
+                        t_ebcJiaSuShouYiJiLu.fanHuan=result_daiShu
+                        t_ebcJiaSuShouYiJiLu.Remark='团队社区星级代数奖:' +str(result_daiShu) +'提成比例'+str(ratio) +t_pj    #'返10%'
+                        t_ebcJiaSuShouYiJiLu.save()                           
+
                 except Exception as e:
                     # 处理错误，此时事务已经回滚 
                     result = ["Failed-TDyeJi", f"ERROR: {e}"]
