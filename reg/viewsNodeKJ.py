@@ -677,6 +677,11 @@ def getKJDayFanHuan(request):
     print(current_timestamp) 
     if t_kuangJi.uTime > current_timestamp   : #时间小于当前时间 已经领取
         return JsonResponse({'valid': False, 'message': '当日已领取'}) 
+
+    # 矿机限制提现
+    if t_kuangJi.statusTiXian==1: # 被限制提现
+         # logger.info(result)
+        return JsonResponse({'valid': False, 'message': "被限制提现，请联系网管"})
     
    
 
@@ -769,7 +774,7 @@ def generate_signature(request):
 
     try:
 
-        now_user = User.objects.filter(username=user_address).first()  
+        now_user = User.objects.filter(username=user_address).first()   # type: Optional[CustomUser] 
         if not now_user:
             return JsonResponse({'valid': False, 'message': '用户不存在'})
         # 得到用户token表
@@ -785,6 +790,10 @@ def generate_signature(request):
         amount10 = float(amount) / (10 ** 18)
         if amount10 > float(now_user.fanHuan):
             return JsonResponse({'valid': False, 'message': '可返还余额不足'}) 
+
+        # 个别限制 用户状态
+        if now_user.statusTiXian==1:
+            return JsonResponse({'valid': False, 'message': ''})
 
 
 

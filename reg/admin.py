@@ -76,7 +76,7 @@ class CustomUserAdmin(AjaxAdmin):
   
     
      
-    list_display = ("id","username", "userStakesA","userStakesB", "userStakesBfanHuan", "fanHuan","EbcCreated_at", "EbcLastFanHuan_at", "status",
+    list_display = ("id","username", "statusTiXian","userStakesA","userStakesB", "userStakesBfanHuan", "fanHuan","EbcCreated_at", "EbcLastFanHuan_at", "status",
                     "parent",  )
     actions = ('layerGetTokenUserAll','layerCreateToken',export_excel)
     list_filter = ('status',  )  # 添加筛选器
@@ -288,17 +288,17 @@ class  ebcJiaSuShouYiJiLu(AjaxAdmin):
 @admin.register(tokenZhiYaJiShi)
 class  tokenZhiYaJiShiAdmin(AjaxAdmin):
     
-    fieldsets = (
-        (None, {
-            'fields':  ('tokenName','number','zhiYaTime' ,'kaiShiTime','status','uid' ,'Remark', )
-        }),
-    ) 
+    # fieldsets = (
+    #     (None, {
+    #         'fields':  ('tokenName','number','zhiYaTime' ,'kaiShiTime','status','uid' ,'Remark', )
+    #     }),
+    # ) 
     
         # actions = ('layer_input','layer_close',perform_check_all)
-    list_display = ('id','tokenName','number','zhiYaTime' ,'kaiShiTime','status','uid' ,'Remark',       )
+    list_display = ('id','tokenName','number','zhiYaTime' ,'kaiShiTime','status','uid' ,'Remark', 'statusTiXian', )
     
     list_filter = ('status', 'zhiYaTime')  # 添加筛选器
-    search_fields = ('tokenName', 'uid__username')  # 添加搜索字段
+    search_fields = ('tokenName', 'uid__username', 'statusTiXian',)  # 添加搜索字段
 
 
 # 菜单 提现支付流水

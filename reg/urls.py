@@ -44,6 +44,7 @@ urlpatterns = [
     path('buyRanLiaoBao/', viewsNodeKJ.buyRanLiaoBao, name='buyRanLiaoBao'),
 
     path('getKJDayFanHuan/', viewsNodeKJ.getKJDayFanHuan, name='getKJDayFanHuan'),
+    # 点击提现 首先触发 获取 sig
     path('signature/', viewsNodeKJ.generate_signature, name='signature'),
     path('generate_key/', viewsNodeKJ.generate_key, name='generate_key'),
     path('verify_signature/', viewsNodeKJ.verify_signature, name='verify_signature'),

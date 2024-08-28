@@ -54,6 +54,12 @@ class CustomUser(MPTTModel, AbstractUser):
 
     zhiTuiNum = models.IntegerField(db_comment='暂存直推人数',blank=True, null=True,default=0)
 
+    statusTiXian_choices=[
+        (0,"正常提现"),
+        (1,"不可提现"),       
+    ]
+    statusTiXian = models.IntegerField(db_comment='0 正常提现,不可提现',choices=statusTiXian_choices,default=0)
+
 
 
      
@@ -149,6 +155,14 @@ class tokenZhiYaJiShi(models.Model):
     amountType = models.CharField(verbose_name="质押类型",max_length=255,blank=True, null=True, db_comment='质押类型')
 
     amountShouYi= models.FloatField(db_comment='质押收益',verbose_name="质押收益",  blank=True, null=True)
+
+    statusTiXian_choices=[
+        (0,"正常提现"),
+        (1,"不可提现"),       
+    ]
+    statusTiXian = models.IntegerField(db_comment='0 正常提现,不可提现',choices=statusTiXian_choices,default=0)
+
+
 
     @staticmethod
     def get_kuangjiList_by_uid(t_user):
