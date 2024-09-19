@@ -63,6 +63,12 @@ class CustomUser(MPTTModel, AbstractUser):
     TDallInAmount= models.FloatField(db_comment='团队全部总值',verbose_name="团队全部总值", blank=True, null=True,default=0)
 
     tuanduiLevelName = models.CharField(verbose_name="团队等级名称",max_length=255,blank=True, null=True, db_comment='团队等级名称')
+    # candy 代表是candy项目的用户
+    userType = models.CharField(verbose_name="用户类型",max_length=255,blank=True, null=True, db_comment='用户类型')
+
+    TuanDuiDaQuUser= models.CharField(verbose_name="团队大区用户",max_length=255,blank=True, null=True, db_comment='团队大区用户')
+
+
 
 
 

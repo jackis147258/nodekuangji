@@ -748,4 +748,68 @@ def ebcTiXianMatic(request):
 
 # @api_view(["POST"])
 # def showMaticBalances(request):  
-      
+
+
+
+# 注册用户
+@api_view(["POST"])
+def regUserCandy(request):    
+    t_username = request.data.get('username')  
+    t_subid = request.data.get('subid') 
+    # return JsonResponse({'valid': True, 'message': '用户注册成功1'})
+    
+    now_user = User.objects.filter(username=t_username).first()
+    if now_user:
+        serializer = CustomUserSerializer(now_user)  # 使用 CustomUserSerializer 对象序列化用户对象
+        serialized_data = serializer.data  # 获取序列化后的数据
+
+        # 判断用户token 是否存在 不存在 补充
+        now_userToken = now_user.usertoken_set.first()     # type: Optional[userToken] 
+        if  not now_userToken: 
+            current_timestamp = int(timezone.now().timestamp())
+            now_userToken = userToken.objects.create(uid=now_user,cTime=current_timestamp)
+            # return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
+        
+        return Response(serialized_data)  # 返回序列化后的 JSON 数据
+        # return JsonResponse({'valid': False, 'message': '用户存在'})
+    
+    new_user = CustomUser()    
+    new_user.is_active=True #是否激活状态
+    new_user.is_staff=True #是否工作人员状态 是否可登录后台
+    
+    new_user.username=t_username
+    new_user.password=make_password('147258')
+    new_user.userType='candy' #candy 用户
+    
+    # 首先检查 t_subid 是否存在，然后尝试将其转换为整数
+    if t_subid is not None:
+        try:
+            t_subid = int(t_subid)
+            # 如果转换成功并且是整数，则处理
+            new_user.parent_id = t_subid
+        except ValueError:
+            # 如果无法转换为整数，可以选择记录错误或进行其他处理
+            pass  # 或者 logging 错误信息
+
+
+    new_user.status=0                  
+    # 保存用户
+    new_user.save()
+        # Add the user to the 'your_custom_group' group
+    your_custom_group = Group.objects.get(name='ebc')
+    new_user.groups.set([your_custom_group])
+
+    # 创建 userToken
+     # 创建关联的 userToken
+    
+    current_timestamp = int(timezone.now().timestamp())
+    now_userToken = userToken.objects.create(uid=new_user,cTime=current_timestamp)
+    
+    serializer = CustomUserSerializer(new_user)  # 使用 CustomUserSerializer 对象序列化用户对象
+    serialized_data = serializer.data  # 获取序列化后的数据
+    return Response(serialized_data)  # 返回序列化后的 JSON 数据
+    
+    # return JsonResponse({'valid': True, 'message': '用户注册成功'})
+
+    # if t_js :
+    #     return JsonResponse(t_js,safe=False)

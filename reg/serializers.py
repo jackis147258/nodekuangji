@@ -39,7 +39,7 @@ class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         # fields = '__all__'
-        fields = ("id","username", "userStakesA","userStakesB", "userStakesBfanHuan", "fanHuan","EbcCreated_at", "EbcLastFanHuan_at", "status", "parent","kapaiLevel","userLevel","tuanduiLevel","kapaiA","kapaiB","kapaiC","cengShu","tokenNum" ,"TDxiaoQuAmount","TDallAmount",)
+        fields = ("id","username", "userStakesA","userStakesB", "userStakesBfanHuan", "fanHuan","EbcCreated_at", "EbcLastFanHuan_at", "status", "parent","kapaiLevel","userLevel","tuanduiLevel","kapaiA","kapaiB","kapaiC","cengShu","tokenNum" ,"TDxiaoQuAmount","TDallAmount","tuanduiLevelName",)
 
 
     def get_tokenNum(self, obj):
@@ -131,7 +131,6 @@ class payTokenSerializer(serializers.ModelSerializer):
 
         if obj.status == 3:
             t_back="hash验证成功"
-
         
         # return "到账" if obj.status == 3 else "未到账"
         return t_back

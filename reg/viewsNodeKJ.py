@@ -295,8 +295,8 @@ def buynodeKJUsdt(request):
         return JsonResponse({'valid': False, 'message':'用户余额不足'}) 
     # 
 
-    if now_user.bestMaxKuangJi>=number:
-        return JsonResponse({'valid': False, 'message': '不能质押小于'+str(number)+'的矿机'})
+    # if now_user.bestMaxKuangJi>=number:
+    #     return JsonResponse({'valid': False, 'message': '不能质押小于'+str(number)+'的矿机'})
 
    
 

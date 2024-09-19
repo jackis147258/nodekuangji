@@ -58,6 +58,8 @@ urlpatterns = [
       # 节点矿机usdt 质押
     path('buynodeKJUsdt/', viewsNodeKJ.buynodeKJUsdt, name='buynodeKJUsdt'),
 
+      # Candy项目 注册新用户 返回 用户信息， 创建userToken
+    path('reguserCandy/', viewsEbc.regUserCandy, name='reguserCandy'),
 
     
 

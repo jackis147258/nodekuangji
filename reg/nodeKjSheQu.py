@@ -37,7 +37,7 @@ def sheQuFenRun():  # amount 分润基数  layer 类型0 矿机质押  1 每日�
             # users_with_high_tdxiaoqu_amount = CustomUser.objects.filter(TDxiaoQuAmount__gt=30000)
             # 筛选 TDxiaoQuAmount 大于 30000 且 username 为空，同时排除特定的用户
             users_with_high_tdxiaoqu_amount = CustomUser.objects.filter(
-                Q(TDxiaoQuAmount__gte=30000)  
+                Q(TDxiaoQuAmount__gte=10000)  
             ).exclude(
                 Q(username='0x606adb6c2b7d415e0fd58b7d9cff6b71e5139ceb') | Q(username='0x8b1a82fa7d895f041854607f613160e216c060d')| Q(username='admin1')
             )
@@ -226,10 +226,12 @@ def TDyeJi(t_user,number):  # amount 分润基数  layer 类型0 矿机质押  1
         # t_backStr={'valid': False, 'message': ' ' }
 
         # 处理平级用户提成        
-        pingJituanduiLevel=0
+        pingJituanduiLevel=-1
+         # 记录平级次数
+        pingJiNum=0
 
         t_parent_id=t_user.parent_id    
-        for i in range(0, 20, 1): #执行20次 向上找20级          
+        for i in range(0, 30, 1): #执行20次 向上找20级          
 
             # 处理第一个人             
               # 到了顶级 就直接 跳出
@@ -256,16 +258,36 @@ def TDyeJi(t_user,number):  # amount 分润基数  layer 类型0 矿机质押  1
                 try:
                     with transaction.atomic(): 
 
-                        children = parentUser.get_children()                        
-                        # 计算每个直推人的 TDallAmount 数量
-                        td_all_amounts = [child.TDallInAmount for child in children]
+                        children = parentUser.get_children()     
+                        # 计算每个直推人的 TDallAmount 和用户名 .username
+                        td_all_amounts_with_usernames = [(child.TDallInAmount, child.username) for child in children]
+                     
+                   
+                        # # 计算每个直推人的 TDallAmount 数量
+                        # td_all_amounts = [child.TDallInAmount for child in children]
 
-                        if td_all_amounts:
+                        if td_all_amounts_with_usernames:
                             # 找到最大的 TDallAmount  大区
-                            max_td_all_amount = max(td_all_amounts)
+                            # max_td_all_amount = max(td_all_amounts)
+                               # 找到最大 TDallInAmount 以及对应的用户名
+                            max_td_all_amount, max_username = max(td_all_amounts_with_usernames, key=lambda x: x[0])
+                                 # 输出最大值和对应的用户名
+                            
+                            print(f"最大 TDallInAmount: {max_td_all_amount}, 对应的用户: {max_username}")
+
+
 
                             # 计算其他人的 TDallAmount 总和  小区
-                            sum_other_td_all_amounts = sum(td_all_amounts) - max_td_all_amount
+                            # sum_other_td_all_amounts = sum(td_all_amounts) - max_td_all_amount
+                            # sum_other_td_all_amounts = sum(td_all_amounts_with_usernames, key=lambda x: x[0]) - max_td_all_amount
+
+                            # 计算所有 TDallInAmount 的总和
+                            total_sum = sum(amount for amount, _ in td_all_amounts_with_usernames)
+
+                            # 从总和中减去一个最大值
+                            sum_other_td_all_amounts = total_sum - max_td_all_amount
+
+
 
                             # 返回值
                             result = sum_other_td_all_amounts
@@ -288,13 +310,17 @@ def TDyeJi(t_user,number):  # amount 分润基数  layer 类型0 矿机质押  1
                             tuanduiLevelName='肆星社区'
                         if result>=5000000:
                             t_tuanduiLevel=15
-                            tuanduiLevelName='伍星社区'
+                            tuanduiLevelName='伍星社区'                                                    
+                        if result>=10000000:
+                            t_tuanduiLevel=20
+                            tuanduiLevelName='六星社区'
 
                         parentUser.TDallAmount=max_td_all_amount #得到团队大区业绩
                         parentUser.TDxiaoQuAmount=sum_other_td_all_amounts #得到小区团队业绩总和
                         parentUser.tuanduiLevel=t_tuanduiLevel
                         parentUser.TDallInAmount+=number #的到用户总业绩
                         parentUser.tuanduiLevelName=tuanduiLevelName #用户团队基本名称
+                        parentUser.TuanDuiDaQuUser= max_username #团队大区用户名
                         
                         parentUser.save()
 
@@ -329,20 +355,23 @@ def TDyeJi(t_user,number):  # amount 分润基数  layer 类型0 矿机质押  1
                         elif level == 10:
                             ratio = 0.06
                         elif level == 15:
-                            ratio = 0.07
+                            ratio = 0.03
+                        elif level == 20:
+                            ratio = 0.09
                         else:
                             ratio = 0  # 其他情况默认比例为 0
                      
                         # 如果 tongJi 为 True，ratio 乘以 10%
                         t_pj='无平级'
                         if parentUser.tuanduiLevel<=pingJituanduiLevel :
-                            ratio *= 0.1
+                            pingJiNum+=1
+                            # ratio *= 0.1
+                            ratio *= (0.1 ** pingJiNum)
+                            ratio = round(ratio, 18)
                             t_pj='有平级'
                         else:
                             pingJituanduiLevel=parentUser.tuanduiLevel
-                        
-                        
-                       
+
                         result_daiShu = ratio * number
 
                             # 得到用户token表

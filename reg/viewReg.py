@@ -60,4 +60,5 @@ def verify_signature(request):
             # 返回签名验证结果
             return JsonResponse({"success": True, "signer_address": signer_address})
     except Exception as e:
+        # return JsonResponse({"success": False, "error": str(e)})
         return JsonResponse({"error": str(e)}, status=500)
