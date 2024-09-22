@@ -172,7 +172,7 @@ class tokenZhiYaJiShi(models.Model):
 
     amountShouYi= models.FloatField(db_comment='质押收益',verbose_name="质押收益",  blank=True, null=True)
 
-    dianJiCiShu = models.IntegerField(db_comment='被点击次数',choices=status_choices,default=0)    
+    dianJiCiShu = models.IntegerField(db_comment='被点击次数',blank=True, null=True,default=0)    
 
 
     @staticmethod

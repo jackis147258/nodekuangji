@@ -315,6 +315,10 @@ def TDyeJi(t_user,number):  # amount 分润基数  layer 类型0 矿机质押  1
                             t_tuanduiLevel=20
                             tuanduiLevelName='六星社区'
 
+                        if result>=15000000:
+                            t_tuanduiLevel=21
+                            tuanduiLevelName='七星社区'
+
                         parentUser.TDallAmount=max_td_all_amount #得到团队大区业绩
                         parentUser.TDxiaoQuAmount=sum_other_td_all_amounts #得到小区团队业绩总和
                         parentUser.tuanduiLevel=t_tuanduiLevel
@@ -357,7 +361,9 @@ def TDyeJi(t_user,number):  # amount 分润基数  layer 类型0 矿机质押  1
                         elif level == 15:
                             ratio = 0.03
                         elif level == 20:
-                            ratio = 0.09
+                            ratio = 0.03
+                        elif level == 21:
+                            ratio = 0.06
                         else:
                             ratio = 0  # 其他情况默认比例为 0
                      

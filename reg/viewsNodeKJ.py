@@ -853,11 +853,19 @@ def getKJDayFanHuan(request):
 
             # 直接使用装饰器设置的 lang 值
     lang_value = request.lang   # zh-TC ,zh-CN,en
-   
-
     
     # t_username = request.data.get('username') 
     t_kuangJiId = request.data.get('kuangJiId') 
+
+
+    # logger.debug(str(t_kuangJiId))
+    # logger.info('Info message')
+    # logger.warning('Warning message')
+
+    logger.info( 'kuangjiid:'+str(t_kuangJiId))
+    # 检查 t_kuangJiId 是否为有效的整数
+    # if t_kuangJiId is None or not isinstance(t_kuangJiId, int) or t_kuangJiId <= 0:
+    #     return JsonResponse({'valid': False, 'message': '矿机ID 无效'})
     
     t_kuangJi = tokenZhiYaJiShi.objects.filter(id=t_kuangJiId).first()
 

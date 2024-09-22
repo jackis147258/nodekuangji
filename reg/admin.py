@@ -291,11 +291,11 @@ class  ebcJiaSuShouYiJiLu(AjaxAdmin):
 @admin.register(tokenZhiYaJiShi)
 class  tokenZhiYaJiShiAdmin(AjaxAdmin):
     
-    fieldsets = (
-        (None, {
-            'fields':  ('tokenName','number','zhiYaTime' ,'kaiShiTime','status','uid' ,'Remark', )
-        }),
-    ) 
+    # fieldsets = (
+    #     (None, {
+    #         'fields':  ('tokenName','number','zhiYaTime' ,'kaiShiTime','status','uid' ,'Remark', )
+    #     }),
+    # ) 
     
         # actions = ('layer_input','layer_close',perform_check_all)
     list_display = ('id','tokenName','number','zhiYaTime' ,'kaiShiTime','status','uid' ,'Remark',       )
