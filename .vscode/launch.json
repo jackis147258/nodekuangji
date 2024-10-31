@@ -46,5 +46,44 @@
             "django": true,
             "justMyCode": true
         }
+        ,
+        {
+            "name": " Command web3File",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",  //# 指向 manage.py 文件
+            "args": ["web3File"],  //# 调试自定义的管理命令
+            "django": true,
+            "console": "integratedTerminal",
+            "env": {
+                "DJANGO_SETTINGS_MODULE": "moon39.settings"  //# 确保 Django 环境被正确加载
+            }
+        }
+        ,
+        {
+            "name": " Command web3BscIsToken",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",  //# 指向 manage.py 文件
+            "args": ["web3BscIsToken"],  //# 调试自定义的管理命令
+            "django": true,
+            "console": "integratedTerminal",
+            "env": {
+                "DJANGO_SETTINGS_MODULE": "moon39.settings"  //# 确保 Django 环境被正确加载
+            }
+        }
+        ,
+        {
+            "name": " Command web3UpdateFabuNum",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",  //# 指向 manage.py 文件
+            "args": ["web3UpdateFabuNum"],  //# 调试自定义的管理命令
+            "django": true,
+            "console": "integratedTerminal",
+            "env": {
+                "DJANGO_SETTINGS_MODULE": "moon39.settings"  //# 确保 Django 环境被正确加载
+            }
+        }
     ]
 }

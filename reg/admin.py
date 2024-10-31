@@ -22,7 +22,7 @@ from .ebcUserTiXian import  userTiXian ,userTiXianHash
 
 from django.urls import reverse
 from django.utils.html import format_html
-from . import  setTokenUsersBalance,web3_utils,web3_tixian
+from . import  setTokenUsersBalance,web3_utils,web3_tixian,nodeKjSheQu
 from django.db import transaction
 
 
@@ -34,6 +34,7 @@ from typing import Optional
 from .nodeKjFenRun import fanTiXianTime
 from .nodeKjSheQu import sheQuFenRun
 from .web3_Price import getPrice
+from django.middleware.csrf import get_token
 
 # import web3_utils 
 def export_excel(modeladmin, request, queryset):
@@ -76,34 +77,53 @@ export_excel.short_description = "导出到Excel"
 
 @admin.register(CustomUser)
 class CustomUserAdmin(AjaxAdmin):
+    # def get_form(self, request, obj=None, **kwargs):
+    #     self.request = request  # 保存请求对象
+    #     return super().get_form(request, obj, **kwargs)
   
     
      
     list_display = ("id","username", "userStakesA","TDallInAmount", "TDallAmount", "TDxiaoQuAmount","EbcCreated_at", "tuanduiLevel", "status",
-                    "parent", 'TuanDuiDaQuUser' )
-    actions = ('layerGetTokenUserAll','layerCreateToken',export_excel)
+                    "parent", 'TuanDuiDaQuUser' ,'userType')
+    actions = ('setupShequ','layerGetTokenUserAll','layerCreateToken',export_excel)
     list_filter = ('status',  )  # 添加筛选器
     # search_fields = ('username', 'id', 'userStakesA', 'userStakesB', 'userStakesBfanHuan', 'parent', 'EbcCreated_at', 'EbcLastFanHuan_at', 'fanHuan')  # 添加搜索字段
     search_fields = ('username', 'id',  )  # 添加搜索字段
     list_per_page = 300  # 设置每页显示的条目数
 
-     # 添加按钮 显示 和关闭
-    # def has_add_permission(self, request):
-    #     return False
-    # def has_delete_permission(self, request, obj=None):
-    #     return False
-    
-    # class Media:
-    #     js = ('js/your_script.js',)
-    #     css = {
-    #         'all': ('admin_styles.css',)  # 更新为您CSS文件的实际路径
-    #     } 
-    
-    # def custom_button(self, obj):
-    #     url = reverse('viewsEbc:changFuLeiview')
-    #     return format_html('<a class="button" href="{}">Custom Action</a>', url)
 
-    # custom_button.short_description = 'changF'
+    def setupShequ(self, request, queryset):
+        name = request.POST.get('name')  # 获取弹出层输入的值
+        if name and name.isdigit():
+            int_value = int(name)
+            # 处理选中的 queryset 数据
+            for user in queryset:
+                # 在这里添加处理逻辑，例如更新用户信息
+                print(f'处理用户: {user.username}, 输入值: {int_value}')
+                nodeKjSheQu.setupSheQuDengji(user,int_value) #处理 用户为 对应等级
+            return JsonResponse({'status': 'success', 'msg': f'处理成功: {int_value}，已处理用户数: {queryset.count()}'})
+        return JsonResponse({'status': 'error', 'msg': '请输入有效的数字'})
+    
+
+   
+
+    setupShequ.short_description = '设置用户社区'
+    setupShequ.layer = {
+        'title': '输入参数',
+        'tips': '请输入一个数字',
+        'confirm_button': '确认',
+        'cancel_button': '取消',
+        'width': '40%',
+        'labelWidth': "80px",
+        'params': [
+            {
+                'type': 'input',
+                'key': 'name',
+                'label': '开始数字',
+                'require': True
+            },
+        ]
+    }
 
         
 
@@ -259,7 +279,111 @@ class CustomUserAdmin(AjaxAdmin):
         },       
                    ]
     }
-    
+
+
+ 
+    # def shequSetup(self, obj):
+    #     # 获取对象的 ID
+    #     parameter_str = 'id={}'.format(str(obj.id))
+
+    #     # 创建输入框和提交按钮
+    #     form_html = '''
+    #         <form action="/reg/shequSetup/" method="post" style="display:inline;">
+    #             <input type="hidden" name="csrfmiddlewaretoken" value="{csrf_token}">
+    #             <input type="number" name="value" placeholder="输入值2" required style="width: 100px;">
+    #             <input type="hidden" name="id" value="{id}">
+    #             <input type="submit" class="btn btn-xs btn-danger" value="提交2">
+    #         </form>
+    #     '''.format(id=obj.id, csrf_token=get_token(self.request))
+
+    #     return format_html(form_html)
+
+    # shequSetup.short_description = '提交输入值2'
+
+    # def shequSetup(self, obj):
+    #     parameter_str = 'id={}'.format(str(obj.id))
+
+    #     input_str = '<input type="number" id="input_{}" placeholder="输入值" required style="width: 100px;">'.format(obj.id)
+
+    #     btn_str = '''
+    #         <a class="btn btn-xs btn-danger" href="#" onclick="submitWithInput({id}); return false;">
+    #             返提现款
+    #         </a>
+    #         <script>
+    #             function submitWithInput(id) {
+    #                 const inputValue = document.getElementById('input_' + id).value;
+    #                 if (inputValue) {
+    #                     const url = '/reg/shequSetup/';
+    #                     const data = {
+    #                         id: id,
+    #                         value: inputValue,
+    #                         csrfmiddlewaretoken: csrfToken  // 使用获取的 CSRF token
+    #                     };
+
+    #                     fetch(url, {
+    #                         method: 'POST',
+    #                         headers: {
+    #                             'Content-Type': 'application/json',
+    #                             'X-CSRFToken': csrfToken  // 添加 CSRF token
+    #                         },
+    #                         body: JSON.stringify(data)
+    #                     })
+    #                     .then(response => response.json())
+    #                     .then(data => {
+    #                         alert(data.message);  // 显示响应消息
+    #                     })
+    #                     .catch(error => {
+    #                         alert('请求失败: ' + error);
+    #                     });
+    #                 } else {
+    #                     alert('请输入一个有效的值');
+    #                 }
+    #             }
+    #         </script>
+    #     '''.format(id=obj.id)
+
+    #     return format_html('{} {}', input_str, btn_str)
+
+    # shequSetup.short_description = '返提现款'
+
+
+
+
+
+
+
+   
+    # def shequSetup(self, obj):
+    #     parameter_str = 'id={}'.format(str(obj.id))
+        
+    #     # 创建输入框和按钮
+    #     input_str = '<input type="number" id="input_{id}" placeholder="输入值" required style="width: 100px;">'.format(id=obj.id)
+    #     btn_str = '''
+    #         <a class="btn btn-xs btn-danger" 
+    #            href="#" onclick="return submitWithInput({id});">
+    #            社区改变
+    #         </a>
+    #     '''.format(id=obj.id)
+
+    #     # 嵌入JavaScript
+    #     js_code = '''
+    #         <script>
+    #             function submitWithInput(id) {
+    #                 const inputValue = document.getElementById('input_' + id).value;
+    #                 if (inputValue) {
+    #                     const link = '/reg/shequSetup/?id=' + id + '&value=' + encodeURIComponent(inputValue);
+    #                     window.location.href = link;
+    #                     return false;  // 阻止默认行为
+    #                 }
+    #                 alert('请输入一个有效的值');
+    #                 return false;  // 阻止默认行为
+    #             }
+    #         </script>
+    #     '''
+        
+    #     return format_html('{} {} <script>function submitWithInput(id) {{ const inputValue = document.getElementById("input_" + id).value; if (inputValue) {{ const link = "/reg/fanTiXian/?id=" + id + "&value=" + encodeURIComponent(inputValue); window.location.href = link; return false; }} alert("请输入一个有效的值"); return false; }}</script>', input_str, btn_str)
+
+    # shequSetup.short_description = '社区改变'
 
 
 @admin.register(ebcJiaSuShouYiJiLu)
@@ -342,6 +466,7 @@ class  payTokenAdmin(AjaxAdmin):
         acct=request.user 
         data_text = request.POST.get('data')   
         # 使用数据库事务来确保所有操作都成功完成
+
         fanTiXianTime(data_text)
              
         # return HttpResponseRedirect('/admin/app1/t_tokenaddr/')  # 重定向到列表页面

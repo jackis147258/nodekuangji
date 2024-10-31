@@ -67,13 +67,10 @@ class CustomUser(MPTTModel, AbstractUser):
     userType = models.CharField(verbose_name="用户类型",max_length=255,blank=True, null=True, db_comment='用户类型')
 
     TuanDuiDaQuUser= models.CharField(verbose_name="团队大区用户",max_length=255,blank=True, null=True, db_comment='团队大区用户')
-
-
-
-
-
-
-
+    # candy 记录 已经发放直推 数量
+    candyFanNum = models.IntegerField(db_comment='已经发放直推数量',blank=True, null=True,default=0)
+    # candy 该用户是否 转出过cc 代币
+    isOneToken = models.IntegerField(db_comment='0 ,1 转出过cc',blank=True, null=True,default=0)
 
 
 

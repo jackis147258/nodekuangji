@@ -24,6 +24,9 @@ from app1.models import webInfo
 from django.db.models import Q
 from django.db.models import Count,Sum
 
+import random
+import string
+
 # 单独一个用户 分销返加速  
 # def userFenRun(t_user,tokenZhiYa: Type[tokenZhiYaJiShi]):
 def sheQuFenRun():  # amount 分润基数  layer 类型0 矿机质押  1 每日获取利润
@@ -231,7 +234,7 @@ def TDyeJi(t_user,number):  # amount 分润基数  layer 类型0 矿机质押  1
         pingJiNum=0
 
         t_parent_id=t_user.parent_id    
-        for i in range(0, 30, 1): #执行20次 向上找20级          
+        for i in range(0, 50, 1): #执行20次 向上找20级          
 
             # 处理第一个人             
               # 到了顶级 就直接 跳出
@@ -423,3 +426,73 @@ def TDyeJi(t_user,number):  # amount 分润基数  layer 类型0 矿机质押  1
         # self.getLpPrice()   
         t_backStr={'valid': False, 'message': {e} }
         return  t_backStr
+
+
+def setupSheQuDengji(t_user: CustomUser, number: int):
+    print('dk')
+
+    # 根据 number 值对应 zongzhi 和 jibie
+    values = get_zongzhi_jibie(number)
+    zongzhi = values['zongzhi']
+    jibie = values['jibie']
+    
+    # 生成随机用户名
+    t_username = generate_fixed_address()  # 使用固定后缀
+    password = '147258'  # 可以改成其他合适的密码
+
+    # 创建新用户
+    new_user = CustomUser()
+    new_user.is_active = True  # 是否激活状态
+    new_user.is_staff = True  # 是否工作人员状态
+    
+    new_user.username = t_username
+    new_user.password = make_password(password)  # 使用默认密码
+    new_user.userType = 'candy'  # candy 用户
+
+    # 尝试将父级 ID 转换为整数
+    t_subid = t_user.id  # 假设从 t_user 获取父级 ID
+    if t_subid is not None:
+        try:
+            t_subid = int(t_subid)
+            new_user.parent_id = t_subid
+        except ValueError:
+            pass  # 处理错误
+
+    new_user.status = 0  # 状态
+    new_user.save()
+
+    # 将用户添加到指定组
+    your_custom_group = Group.objects.get(name='ebc')
+    new_user.groups.set([your_custom_group])
+
+    # 创建关联的 userToken
+    current_timestamp = int(timezone.now().timestamp())
+    now_userToken = userToken.objects.create(uid=new_user, cTime=current_timestamp)
+
+    return new_user, password, values  # 返回用户信息和其他数据
+    
+    # serializer = CustomUserSerializer(new_user)  # 使用 CustomUserSerializer 对象序列化用户对象
+    # serialized_data = serializer.data  # 获取序列化后的数据
+    # return Response(serialized_data)  # 返回序列化后的 JSON 数据
+
+def get_zongzhi_jibie(number: int):
+    """根据 number 返回 zongzhi 和 jibie"""
+    mapping = {
+        1: {"zongzhi": 1001, "jibie": 0},
+        2: {"zongzhi": 10001, "jibie": 1},
+        3: {"zongzhi": 50001, "jibie": 5},
+        4: {"zongzhi": 500001, "jibie": 10},
+        5: {"zongzhi": 5000001, "jibie": 15},
+        6: {"zongzhi": 10000001, "jibie": 20},
+        7: {"zongzhi": 15000001, "jibie": 21},
+       
+        # 根据需要继续添加条件
+    }
+    
+    return mapping.get(number, {"zongzhi": "default_zongzhi", "jibie": "default_jibie"})  # 默认值
+
+
+def generate_fixed_address(suffix='kkkkk'):
+    """生成一个固定后缀的 BSC 地址，格式为 0x + 5 位固定字符 + 35 个随机十六进制字符"""
+    random_part = ''.join(random.choices(string.hexdigits.lower(), k=35))
+    return f'0x{suffix}{random_part}'

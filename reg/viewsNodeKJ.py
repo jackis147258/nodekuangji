@@ -444,7 +444,7 @@ def buynodeKJUsdt(request):
                 # 计入奖金池
                 # t_jiasuJiangJinChi
                 now_webid = webInfo.objects.filter(webid=3).first()    
-                t_FanUsdt=number*0.05 #5% 作为分润
+                t_FanUsdt=number*0.02 #2% 作为分润
                 # t_FanUsdt 转为 amt  0.1 为amt 价格
 
                 latest_price = redis_client.get('token_price') 
@@ -453,6 +453,15 @@ def buynodeKJUsdt(request):
 
                 now_webid.jiangJinChi=now_webid.jiangJinChi+amtLirun_rounded
                 now_webid.save() 
+                # 3%  转到 一个用户账户
+                now_user3 = User.objects.filter(username='0xdCd25883c519934351EeABe6b065357e88689882').first()  # type: Optional[CustomUser] 
+                # 得到用户token表
+                now_userToken3 = now_user3.usertoken_set.first()     # type: Optional[userToken]               
+                # now_userToken3.usdtToken=now_userToken.usdtToken-number
+                # 增加奖金池奖金
+                now_userToken3.jzToken+=number*0.03                 
+                now_userToken3.save()
+
 
             # 团队业绩记录
             t_backStr=TDyeJi(now_user,number)
@@ -1230,3 +1239,47 @@ def fanTiXian(request):
         t_payToken.Remark+='-提现退回'
         t_payToken.save()
     return redirect('/admin/reg/paytoken/') 
+
+
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+
+
+
+
+def verify_signature(request):
+    # 从请求中获取数据
+    user_address = request.data.get('username')
+    amount = int(request.data.get('amount'))
+
+
+
+
+# @api_view(["POST"])
+# 自动修改社区状态
+def shequSetup(request):
+    id = request.GET.get('id','')
+
+    user_address = request.data.get('value')
+    amount = int(request.data.get('value'))
+
+    t_payToken=payToken.objects.filter(id=id ).order_by('-id').first()    
+    # if not payToken==None:
+    #     now_user = User.objects.filter(id=t_payToken.uidB).first()  # type: Optional[CustomUser]
+    #     if not now_user:
+    #         return JsonResponse({'valid': False, 'message': '用户不存在'})
+    #     # 得到用户token表
+    #     now_userToken = now_user.usertoken_set.first()     # type: Optional[userToken] 
+    #     if  not now_userToken: 
+    #         return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
+        
+    #     # 用户返款
+    #     # now_user.fanHuan+=t_payToken.amount
+    #     # now_user.save()
+
+    #     now_userToken.jzToken+=t_payToken.amount
+    #     now_userToken.save()
+    #     t_payToken.status=1 #返还 提现
+    #     t_payToken.Remark+='-提现退回'
+    #     t_payToken.save()
+    return redirect('/admin/reg/customuser/') 

@@ -480,10 +480,14 @@ def tuanDuiRenShu(username):
             # children_names = [child.username for child in children if child.status == 1]              
             # children_names = [child.username for child in children ]  
              
+            # children_names = [
+            #     (child.username, "团队等级:"+str(child.tuanduiLevel) ) 
+            #     for child in children
+            # ]        
             children_names = [
-                (child.username, "团队等级:"+str(child.tuanduiLevel) ) 
+                (child.username, "-"  ) 
                 for child in children
-            ]           
+            ]      
             # children_names = [
             #     (child.username, "已开挖" if child.cengShu >=2 else "未挖矿") 
             #     for child in children
@@ -496,8 +500,12 @@ def tuanDuiRenShu(username):
             #     (child.username, "已开挖" if child.cengShu >=2 else "未挖矿") 
             #     for child in get_descendants
             # ]
+            # descendants_names = [
+            #     (child.username, "团队等级:"+str(child.tuanduiLevel)) 
+            #     for child in get_descendants
+            # ]
             descendants_names = [
-                (child.username, "团队等级:"+str(child.tuanduiLevel)) 
+                (child.username, "-") 
                 for child in get_descendants
             ]
             get_descendants_count=user.get_descendants().count()

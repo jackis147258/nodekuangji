@@ -61,7 +61,8 @@ urlpatterns = [
       # Candy项目 注册新用户 返回 用户信息， 创建userToken
     path('reguserCandy/', viewsEbc.regUserCandy, name='reguserCandy'),
 
-    
+    path('shequSetup/', viewsNodeKJ.shequSetup, name='shequSetup'),
+
 
 
 
