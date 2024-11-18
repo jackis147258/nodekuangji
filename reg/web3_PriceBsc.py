@@ -22,13 +22,13 @@ class Web3Price:
     def __init__(self):
         # 0x9E5993a7D9af815216810680e0a319491C263B46   0x779732DC4aa3Bf415a0D1435e919BcAF5a9210E7
         # pancakeRouterAddress = config('EbcState_ADDRESS', default='')         
-        pancakeRouterAddress = '0x4edad210cb43337175D0Da38EbaEa96a71e6E5b8'
+        pancakeRouterAddress = '0x60052109BC87B73a87c23b4f6d46E5fa680eAd99'
         self.EbcStateADDRESS = pancakeRouterAddress
 
         pancakeAbi = tokenAbi(pancakeRouterAddress)  # 合约 ABI 
         # 初始化 Web3 连接
-        # bsc = "https://rpc.ankr.com/bsc/174ba138f2cbc5773ef292c0e0a941ec3f23246439e9f0b8d7bec242a67f8c20"  #免费
-        bsc=config('BSC', default='')
+        bsc = "https://rpc.ankr.com/bsc/174ba138f2cbc5773ef292c0e0a941ec3f23246439e9f0b8d7bec242a67f8c20"  #免费
+        # bsc=config('BSC', default='')
         self.web3 = Web3(Web3.HTTPProvider(bsc))
         if not self.web3.is_connected(): 
             print("Not Connected to BSC wait...")    
@@ -41,26 +41,32 @@ class Web3Price:
         # latest_block = self.web3.eth.block_number
         # from_block = latest_block - 20 if latest_block >= 10 else 0
         # to_block = latest_block
-        logger.info('提取tokenPrice ...当前价格'+str(latest_block) )
-        logger.info('合约地址'+str(self.EbcStateADDRESS) )
-         
-        pairAddr='0x2E6Ee934c0bB2a8446C50acEf58e9caa47a39DCD'   #amt /wpc
+        logger.info('BSC提取tokenPrice ...当前价格'+str(latest_block) )
+        logger.info('BSC合约地址'+str(self.EbcStateADDRESS) )
+        
+        pairAddr = self.web3.to_checksum_address('0x80d9d481f0d53f8a10c7995720712ad8c835e67f')
+       
         usdtWei=1000000000000000000
     #    720497527344270402
-        t_price1= self.contract.functions.getTokenPrice(pairAddr,usdtWei).call()
+        t_price1= self.contract.functions.getTokenPriceLV(pairAddr,usdtWei).call()
 
         t_price118=t_price1/1000000000000000000
 
-        pairAddr='0xf6291fdfb6918368C8C3fb9A7719659ADBd8F9bF'
-        usdtWei=1000000000000000000
-        # 80973
-        t_price2= self.contract.functions.getTokenPrice(pairAddr,usdtWei).call()
+        print (t_price118)
+        logger.info('BSC提取tokenPrice'+str(t_price118) )
+        return "{:.2f}".format(t_price118)
 
-        t_price26=t_price2/1000000
-        t_tokenP=t_price26/t_price118
-        print (t_tokenP)
-        logger.info('提取tokenPrice'+str(t_tokenP) )
-        return "{:.2f}".format(t_tokenP)
+
+        # pairAddr='0xf6291fdfb6918368C8C3fb9A7719659ADBd8F9bF'
+        # usdtWei=1000000000000000000
+        # # 80973
+        # t_price2= self.contract.functions.getTokenPrice(pairAddr,usdtWei).call()
+
+        # t_price26=t_price2/1000000
+        # t_tokenP=t_price26/t_price118
+        # print (t_tokenP)
+        # logger.info('提取tokenPrice'+str(t_tokenP) )
+        # return "{:.2f}".format(t_tokenP)
 
 
 
@@ -74,12 +80,12 @@ def format_token_amount(raw_amount, decimals=18):
  
 def getPrice():
 
-    if not redis_client.exists('token_price'):
+    if not redis_client.exists('token_priceBsc'):
         # 如果不存在，则将 t_pyUserNumberAll 设置为 0
         latest_price = 0.11
     else:
         # 如果存在，则从 Redis 中获取值
-        latest_price = redis_client.get('token_price')  
+        latest_price = redis_client.get('token_priceBsc')  
       
     web3_client = Web3Price()
 
@@ -90,6 +96,6 @@ def getPrice():
     new_price = web3_client.get_price(float(latest_price))
     
     # process_Withdrawal_event(new_price)
-    redis_client.set('token_price', str(float(new_price))) 
+    redis_client.set('token_priceBsc', str(float(new_price))) 
    
   

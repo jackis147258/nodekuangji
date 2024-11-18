@@ -31,14 +31,14 @@ PANCAKE_ROUTER_ADDRESS = "0x10ED43C718714eb63d5aA57B78B54704E256024E"
 # ebcOld_TOKEN_ADDRESS = '0xccaD64E05A10892d192972a0BCd81a87BdbC6293' 
 # newEbc_TOKEN_ADDRESS = '0x10E5a77Af4AB39eEF8393fCb2f8cfDe1971857Fb' 
 ebcOld_TOKEN_ADDRESS = '0x10E5a77Af4AB39eEF8393fCb2f8cfDe1971857Fb' 
-newEbc_TOKEN_ADDRESS = '0xcEa2729fE4D4cEEB74113DE43B607cF57467ef8b' 
+newEbc_TOKEN_ADDRESS = '0x15C020F9284463eC0220Ada52CDd798B7ddd812D' 
  
 
 
 # GetBnb Setup   
 GuiJiWallter='0x710b2D51882bc32e63619310918183c666650Bd1'
 # maticKey='3fa006e4aec07ced87b05765417fea8e4f2ac1b2c1fb2818dfe49276bf9546f1'
-maticKey='0x2799ec259402332b67159fb89bfb436f0d01f35cb9ea991c9923a480f87f50d3'
+maticKey='0x61c4e4a0c0ac8561cbbfa7db096a0d5500d97152b0245ace4480db469fe76dd4'  #0x8b1A82fA7D895F041854607F613160E216C060D6
 
 class DefiAuto(object):    
     def __init__(self):        
@@ -76,93 +76,76 @@ class DefiAuto(object):
             variables_list = []
             tokenList=[]
             for myToken in GetTokens.tokenList: 
-
-                successful = False  # 用于跟踪当前 token 是否处理成功
-            
-                while not successful:  # 重复处理直到成功
-
-                    try:
-                        # gasbnbToken=myToken['token']                
-                        # gasAccount=self.web3.eth.account.from_key(gasbnbToken)      
-                        gasAccountWallet = self.web3.to_checksum_address(myToken['token'])
-                    except Exception as e:
-                        # self.proxies=self.changeIpweb3()
-                        result = ["Failed-transfer_bnbGas", f"ERROR: {e}"]
-                        print(result)
-                        # time.sleep(30)
-                        continue                
-    
-                    # gasAccountWallet = myToken['token']    
-                    # to = Web3.to_checksum_address(to)
+                # gasbnbToken=myToken['token']                
+                # gasAccount=self.web3.eth.account.from_key(gasbnbToken)      
+                gasAccountWallet = self.web3.to_checksum_address(myToken['token'])
+  
+                # gasAccountWallet = myToken['token']    
+                # to = Web3.to_checksum_address(to)
+               
+                # 查看 ymii 余额
+                _userStakeA= self.contractSellToken.functions._userStakeA(gasAccountWallet).call() 
+                _userStakeB= self.contractSellToken.functions._userStakeB(gasAccountWallet).call() 
+                _userStakeStartTime= self.contractSellToken.functions._userStakeStartTime(gasAccountWallet).call() 
+                _userLastClaimTime= self.contractSellToken.functions._userLastClaimTime(gasAccountWallet).call() 
+                _userEndClaimTime= self.contractSellToken.functions._userEndClaimTime(gasAccountWallet).call() 
+                _userStakeTime= self.contractSellToken.functions._userStakeTime(gasAccountWallet).call() 
+                _userMoonClaimTime= self.contractSellToken.functions._userMoonClaimTime(gasAccountWallet).call() 
+                _userMoonClaimNumber= self.contractSellToken.functions._userMoonClaimNumber(gasAccountWallet).call() 
+               
                 
-                    # 查看 ymii 余额
-                    _userStakeA= self.contractSellToken.functions._userStakeA(gasAccountWallet).call() 
-                    _userStakeB= self.contractSellToken.functions._userStakeB(gasAccountWallet).call() 
-                    _userStakeStartTime= self.contractSellToken.functions._userStakeStartTime(gasAccountWallet).call() 
-                    _userLastClaimTime= self.contractSellToken.functions._userLastClaimTime(gasAccountWallet).call() 
-                    _userEndClaimTime= self.contractSellToken.functions._userEndClaimTime(gasAccountWallet).call() 
-                    _userStakeTime= self.contractSellToken.functions._userStakeTime(gasAccountWallet).call() 
-                    _userMoonClaimTime= self.contractSellToken.functions._userMoonClaimTime(gasAccountWallet).call() 
-                    _userMoonClaimNumber= self.contractSellToken.functions._userMoonClaimNumber(gasAccountWallet).call() 
+                # 第一组变量
+                group1 = {
+                        'userAddr': gasAccountWallet,
+                        '_userStakeA': _userStakeA,
+                        '_userStakeB': _userStakeB,
+                        '_userStakeStartTime': _userStakeStartTime,
+                        '_userLastClaimTime': _userLastClaimTime,
+                        '_userEndClaimTime': _userEndClaimTime,
+                        '_userStakeTime': _userStakeTime,
+                        '_userMoonClaimTime': _userMoonClaimTime,
+                        '_userMoonClaimNumber': _userMoonClaimNumber,
+                        }
+                variables_list.append(group1)  
+                nonce = self.web3.eth.get_transaction_count(maticKeyAddr.address)
+                # amount=self.web3.to_wei(value, 'ether')
+                t_gas=self.web3.eth.gas_price
+                # amount=value
+                # t_gas=self.web3.eth.gas_price
+                # Build a transaction that invokes this contract's function, called transfer
+                token_txn = self.contractNewSellToken.functions.stakeTestSet(
+                        group1['userAddr'],
+                        group1['_userStakeA'], 
+                        group1['_userStakeB'], 
+                        group1['_userStakeStartTime'],  
+                        group1['_userLastClaimTime'],
+                        group1['_userEndClaimTime'], 
+                        group1['_userStakeTime'], 
+                        group1['_userMoonClaimTime'], 
+                        group1['_userMoonClaimNumber'], 
+                        ).build_transaction({
+                    'chainId': 137,
+                    'gas': 6000000,
+                    'gasPrice': t_gas,
+                    'nonce': nonce,
+                    })            
+                signed_txn = self.web3.eth.account.sign_transaction(token_txn, private_key=maticKey)
                 
+                try:
+                    tx_hash=self.web3.eth.send_raw_transaction(signed_txn.rawTransaction)             
+                
+                    time1 = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    result=[time1,'数据转移成功:',group1['userAddr'],group1['_userStakeA'],'token:',gasAccountWallet,self.web3.to_hex(tx_hash)]
+                    tokenList.append(result)
+                    print(result)
                     
-                    # 第一组变量
-                    group1 = {
-                            'userAddr': gasAccountWallet,
-                            '_userStakeA': _userStakeA,
-                            '_userStakeB': _userStakeB,
-                            '_userStakeStartTime': _userStakeStartTime,
-                            '_userLastClaimTime': _userLastClaimTime,
-                            '_userEndClaimTime': _userEndClaimTime,
-                            '_userStakeTime': _userStakeTime,
-                            '_userMoonClaimTime': _userMoonClaimTime,
-                            '_userMoonClaimNumber': _userMoonClaimNumber,
-                            }
+                    time.sleep(20)
 
-                    # print(json.dumps(group1, indent=4))
-
-                    variables_list.append(group1)  
-                    nonce = self.web3.eth.get_transaction_count(maticKeyAddr.address)
-                    # amount=self.web3.to_wei(value, 'ether')
-                    t_gas=self.web3.eth.gas_price
-                    # amount=value
-                    # t_gas=self.web3.eth.gas_price
-                    # Build a transaction that invokes this contract's function, called transfer
-                    token_txn = self.contractNewSellToken.functions.stakeTestSet(
-                            group1['userAddr'],
-                            group1['_userStakeA'], 
-                            group1['_userStakeB'], 
-                            group1['_userStakeStartTime'],  
-                            group1['_userLastClaimTime'],
-                            group1['_userEndClaimTime'], 
-                            group1['_userStakeTime'], 
-                            group1['_userMoonClaimTime'], 
-                            group1['_userMoonClaimNumber'], 
-                            ).build_transaction({
-                        'chainId': 137,
-                        'gas': 6000000,
-                        'gasPrice': t_gas,
-                        'nonce': nonce,
-                        })            
-                    signed_txn = self.web3.eth.account.sign_transaction(token_txn, private_key=maticKey)
-                    
-                    try:
-                        tx_hash=self.web3.eth.send_raw_transaction(signed_txn.rawTransaction)             
-                    
-                        time1 = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                        result=[time1,'数据转移成功:',myToken['ApprovedBuy'] ,group1['userAddr'],group1['_userStakeA'],'token:',gasAccountWallet,self.web3.to_hex(tx_hash)]
-                        tokenList.append(result)
-                        print(result)
-                        
-                        time.sleep(20)
-                        successful = True  # 标记处理成功
-
-                    except Exception as e:
-                        # self.proxies=self.changeIpweb3()
-                        result = ["Failed-transfer_bnbGas", f"ERROR: {e}"]
-                        print(result)
-                        time.sleep(30)
-                        # continue                
+                except Exception as e:
+                    # self.proxies=self.changeIpweb3()
+                    result = ["Failed-transfer_bnbGas", f"ERROR: {e}"]
+                    print(result)
+                    continue                
                     
             result=['全部数据转移',len(tokenList),'个' ]
             print(result)

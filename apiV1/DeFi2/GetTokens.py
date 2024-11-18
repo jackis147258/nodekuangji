@@ -1,49 +1,37 @@
 tokenList = [
-
-         {'token':'0x1323B06a2b72b1b1638712ca4CEaF0EbF89B379F','ApprovedBuy':1,'ApprovedSell':1},
-    {'token':'0xd98291ee0667783696b8b2bd051c3438f9ff5fd7','ApprovedBuy':1,'ApprovedSell':1},
-   
-       
-   #       {'token':'0x7d6b3202230e81eb329f2ee381115b9b4e7762ff','ApprovedBuy':1,'ApprovedSell':1},
-   #  {'token':'0x1994f463cd8c50084a01a084e3bc2c1320bc8926','ApprovedBuy':1,'ApprovedSell':1},
-   #  {'token': '0xD4B8F3b6a3661B5C2Fff9A7309382eD307EfD459', 'ApprovedBuy': 1, 'ApprovedSell': 0},
-   #     {'token':'0xd98291ee0667783696b8b2bd051c3438f9ff5fd7','ApprovedBuy':1,'ApprovedSell':1},
-    
-
-#        {'token':'0x2bd2d991a298db7359a698110be4ff1b34609583','ApprovedBuy':1,'ApprovedSell':1},
-#     {'token':'0x82f4c237730a83bbcaac2939453823529defac74','ApprovedBuy':1,'ApprovedSell':1},
-#     {'token': '0xb4813cc7e238c7edd20eff0a1e578f6b708e478e', 'ApprovedBuy': 1, 'ApprovedSell': 0},
-
-        #  {'token':'0x6c4Ca42c425a278a203b6c770ee1103e2aDE7989','ApprovedBuy':1,'ApprovedSell':1},
-
-
-     # {'token':'0x4e84f0081323DCb837AFc33c2Fa84FC2426688d5','ApprovedBuy':1,'ApprovedSell':1},
-#     {'token':'0xde5ac7d8006b0a7b0722139930e7363516bb6bbb','ApprovedBuy':1,'ApprovedSell':1},
-#     {'token': '0x6c4ca42c425a278a203b6c770ee1103e2ade7989', 'ApprovedBuy': 1, 'ApprovedSell': 0},
   
-
-#     {'token':'0x2bd2d991a298db7359a698110be4ff1b34609583','ApprovedBuy':1,'ApprovedSell':1},
-#     {'token':'0x82f4c237730a83bbcaac2939453823529defac74','ApprovedBuy':1,'ApprovedSell':1},
-#     {'token': '0xb4813cc7e238c7edd20eff0a1e578f6b708e478e', 'ApprovedBuy': 1, 'ApprovedSell': 0},
-
-#     {'token': '0xaced02a83bab80c000aae3c123144706bcf537ae', 'ApprovedBuy': 1, 'ApprovedSell': 0}    ,
-#     {'token': '0x86b9d2dc92aca16501291531f17668e6adb71aac', 'ApprovedBuy': 1, 'ApprovedSell': 0}    ,       
-# {'token': '0xd98291ee0667783696b8b2bd051c3438f9ff5fd7', 'ApprovedBuy': 1, 'ApprovedSell': 0},
-# {'token': '0xbb2e26e4b38bce2c82722c723ffc583fa32b0701', 'ApprovedBuy': 1, 'ApprovedSell': 0},
-# {'token': '0x1323b06a2b72b1b1638712ca4ceaf0ebf89b379f', 'ApprovedBuy': 1, 'ApprovedSell': 0},
-# {'token': '0x7d6b3202230e81eb329f2ee381115b9b4e7762ff', 'ApprovedBuy': 1, 'ApprovedSell': 0},
-
-#     {'token':'0x1994f463cd8c50084a01a084e3bc2c1320bc8926','ApprovedBuy':1,'ApprovedSell':1},
-#     {'token':'0x66efc621f93e2f09cd6e5bc8e7d7cf45a19f5202','ApprovedBuy':1,'ApprovedSell':1},
-
-#     {'token': '0xbf541aa5575260ab0c1cdc52ede7cde2fb98cb46', 'ApprovedBuy': 1, 'ApprovedSell': 0},
-#     {'token': '0xab59eb90937ea16f32bf4fd57315007e42bf30e0', 'ApprovedBuy': 1, 'ApprovedSell': 0}    ,
-#     {'token': '0xe3e7758341288e7a6b2a811027f7501fab02ccaa', 'ApprovedBuy': 1, 'ApprovedSell': 0}    ,       
-# {'token': '0xd4b8f3b6a3661b5c2fff9a7309382ed307efd459', 'ApprovedBuy': 1, 'ApprovedSell': 0},
-# {'token': '0xd8b209035e1efaf326bafd52ae5ba17c568eec5d', 'ApprovedBuy': 1, 'ApprovedSell': 0},
-# {'token': '0xd68dde6e8eef1b0cf35fdd91b2fb4d3ae9609206', 'ApprovedBuy': 1, 'ApprovedSell': 0},
-# {'token': '0x97269d1e6b3ccb5655c5f0eff2d2daa87f8d21cb', 'ApprovedBuy': 1, 'ApprovedSell': 0},
-
- 
-
+{"token": "0x1388EA914e1E2D74Cf16052301AE9eeC5dF295F4", "ApprovedBuy": 1, "newToken": "newAddress"},
+{"token": "0x3E4FBB9fC62B635d1C174DD6007e1eB1D9820fC6", "ApprovedBuy": 2, "newToken": "newAddress"},
+{"token": "0x880847157C45EA8839F69d157C08abAb547F4D26", "ApprovedBuy": 3, "newToken": "newAddress"},
+{"token": "0x4DEaAaaDda8AA99e9f79726Ac486FD255362E1d1", "ApprovedBuy": 4, "newToken": "newAddress"},
+{"token": "0xaA607C1e6f7f6B815dC77AF28Efa66E3EC29Ae40", "ApprovedBuy": 5, "newToken": "newAddress"},
+{"token": "0xfCc20c82c2fB6C88098a82580F2D8262F3598D00", "ApprovedBuy": 6, "newToken": "newAddress"},
+{"token": "0x92cE422d18a3F771193508f7De8D5539AeD2Ba22", "ApprovedBuy": 7, "newToken": "newAddress"},
+{"token": "0xaC8F2E9F26B3e6747DaeEE0A3EC861AA75D4Ef66", "ApprovedBuy": 8, "newToken": "newAddress"},
+{"token": "0x979f92CE74e9ED7C640C37DD7a317A89D1Cc8cA5", "ApprovedBuy": 10, "newToken": "newAddress"},
+{"token": "0xA511a85FF44A33bB79BA855E054e52587d23ea33", "ApprovedBuy": 12, "newToken": "newAddress"},
+{"token": "0x7e35D7B87C7ECAeB7f6D6de4384e5890b23a8804", "ApprovedBuy": 13, "newToken": "newAddress"},
+{"token": "0x9F4F9CF412D6181Ff6FD3d61D4AcDE2286355273", "ApprovedBuy": 14, "newToken": "newAddress"},
+{"token": "0x97269D1e6B3CcB5655C5f0efF2d2DaA87f8D21Cb", "ApprovedBuy": 15, "newToken": "newAddress"},
+{"token": "0x2a69FeAC802bC41b1469a897154E9D275218EEaA", "ApprovedBuy": 16, "newToken": "newAddress"},
+{"token": "0x663d8B86A17016B70777c701002F7DF64E7C2b6e", "ApprovedBuy": 17, "newToken": "newAddress"},
+{"token": "0x81b1f98537D614925781B8A8A446Cb201920d4cE", "ApprovedBuy": 18, "newToken": "newAddress"},
+{"token": "0xb43527b14235F6428D4c33bbdaBe0D6cfC10c7fc", "ApprovedBuy": 19, "newToken": "newAddress"},
+{"token": "0x6B6A282ee04cD07aC372D01e98260C49625faAc8", "ApprovedBuy": 20, "newToken": "newAddress"},
+{"token": "0x823884c6F00f3e3b8908D81cF7aa01618312eB80", "ApprovedBuy": 22, "newToken": "newAddress"},
+{"token": "0xC7D20F1e9bb39A55cE82ef1F9C103A2ab0ea1946", "ApprovedBuy": 23, "newToken": "newAddress"},
+{"token": "0x31eC50FC596cA48FB0AA2a6d209df3676E572d29", "ApprovedBuy": 24, "newToken": "newAddress"},
+{"token": "0xACeD02a83bAb80c000AAe3C123144706bCF537AE", "ApprovedBuy": 25, "newToken": "newAddress"},
+{"token": "0x76627AC96814D36C29317367Bb8754ea32f31c06", "ApprovedBuy": 27, "newToken": "newAddress"},
+{"token": "0x220c22F8E8440a0954621AD8bC15b85e5b8AB75a", "ApprovedBuy": 29, "newToken": "newAddress"},
+{"token": "0x0D37Ecf96Ea265eDB50d0Fe6bB8B805873feA822", "ApprovedBuy": 31, "newToken": "newAddress"},
+{"token": "0xd56503065b28530e1b17f603ac7965e93E543b62", "ApprovedBuy": 33, "newToken": "newAddress"},
+{"token": "0xeD5f57F5e1d8dD082E92d127a2EfA4ba31b6611a", "ApprovedBuy": 35, "newToken": "newAddress"},
+{"token": "0x340499A438be10615f416EaE2c93ede70743e9a4", "ApprovedBuy": 37, "newToken": "newAddress"},
+{"token": "0xFc62dc95b37E66cbFB931A26cc29A64DfD0f5053", "ApprovedBuy": 39, "newToken": "newAddress"},
+{"token": "0xe93D96925D02B4cb2463D6e793F70654692f89ff", "ApprovedBuy": 41, "newToken": "newAddress"},
+{"token": "0x267a08a2A223f86A12DFcf0EF34e0fbF748e887a", "ApprovedBuy": 43, "newToken": "newAddress"},
+{"token": "0x2aE79123A23210CE69771D8b65EF1438FcbfB853", "ApprovedBuy": 45, "newToken": "newAddress"},
+{"token": "0x448963B7Be9ea49DF35528F8ac088518A8186055", "ApprovedBuy": 47, "newToken": "newAddress"},
+{"token": "0xE00EA5aA3803B2D7011f0c15c5a11dAbe080E1aE", "ApprovedBuy": 49, "newToken": "newAddress"},
 ]

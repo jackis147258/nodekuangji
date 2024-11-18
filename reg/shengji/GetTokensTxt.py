@@ -1,0 +1,10 @@
+tokenList = [
+{
+    "userPAddr": "0xea68E62f1c11c6002D3E06D18582B70f91223111",
+    "user1Addr": "0x824cd3888934d94DC08651abD381B3925CE604dB",
+    "user2Addr": "0x454C5D0ef7975535f71B9D5f235B03631f1F60C7", 
+    "xingJi": 0
+},
+
+ 
+]

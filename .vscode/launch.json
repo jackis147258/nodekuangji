@@ -85,5 +85,18 @@
                 "DJANGO_SETTINGS_MODULE": "moon39.settings"  //# 确保 Django 环境被正确加载
             }
         }
+        ,
+        {
+            "name": " Command web3TokenPrice",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/manage.py",  //# 指向 manage.py 文件
+            "args": ["web3TokenPrice"],  //# 调试自定义的管理命令
+            "django": true,
+            "console": "integratedTerminal",
+            "env": {
+                "DJANGO_SETTINGS_MODULE": "moon39.settings"  //# 确保 Django 环境被正确加载
+            }
+        }
     ]
 }

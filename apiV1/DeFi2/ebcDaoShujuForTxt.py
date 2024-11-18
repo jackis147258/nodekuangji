@@ -16,7 +16,7 @@ from decimalData import getTokenDecimal
 import requests
 import json
 import  random 
-import GetTokens,Defi2Token
+import GetTokens,GetTokensTxt
 import datetime
 from multiprocessing import Process
  
@@ -46,16 +46,16 @@ class DefiAuto(object):
         bsc ='https://rpc.ankr.com/polygon/145b63c3aa3fc77ce3d05be2c9f1caba16322f6957f8c975d05da3fe08c110f5'    
         self.web3 = Web3(Web3.HTTPProvider(bsc)) 
       
-        self.TokenToSellAddress = self.web3.to_checksum_address(ebcOld_TOKEN_ADDRESS)
+        # self.TokenToSellAddress = self.web3.to_checksum_address(ebcOld_TOKEN_ADDRESS)
         self.newTokenToSellAddress = self.web3.to_checksum_address(newEbc_TOKEN_ADDRESS)
  
         
         try:
           
-            sellTokenAbi = tokenAbi(self.TokenToSellAddress) 
+            # sellTokenAbi = tokenAbi(self.TokenToSellAddress) 
             newTokenToSellAddressAbi = tokenAbi(self.newTokenToSellAddress ) 
             
-            self.contractSellToken = self.web3.eth.contract(self.TokenToSellAddress, abi=sellTokenAbi)                    
+            # self.contractSellToken = self.web3.eth.contract(self.TokenToSellAddress, abi=sellTokenAbi)                    
             self.contractNewSellToken = self.web3.eth.contract(self.newTokenToSellAddress, abi=newTokenToSellAddressAbi)
           
         
@@ -75,48 +75,54 @@ class DefiAuto(object):
                 
             variables_list = []
             tokenList=[]
-            for myToken in GetTokens.tokenList: 
+            for myToken in GetTokensTxt.tokenList: 
 
                 successful = False  # 用于跟踪当前 token 是否处理成功
             
                 while not successful:  # 重复处理直到成功
 
                     try:
-                        # gasbnbToken=myToken['token']                
-                        # gasAccount=self.web3.eth.account.from_key(gasbnbToken)      
-                        gasAccountWallet = self.web3.to_checksum_address(myToken['token'])
+                     
+                        gasAccountWallet = self.web3.to_checksum_address(myToken['userAddr'])
                     except Exception as e:
-                        # self.proxies=self.changeIpweb3()
+                       
                         result = ["Failed-transfer_bnbGas", f"ERROR: {e}"]
                         print(result)
-                        # time.sleep(30)
+                        
                         continue                
-    
-                    # gasAccountWallet = myToken['token']    
-                    # to = Web3.to_checksum_address(to)
+     
                 
-                    # 查看 ymii 余额
-                    _userStakeA= self.contractSellToken.functions._userStakeA(gasAccountWallet).call() 
-                    _userStakeB= self.contractSellToken.functions._userStakeB(gasAccountWallet).call() 
-                    _userStakeStartTime= self.contractSellToken.functions._userStakeStartTime(gasAccountWallet).call() 
-                    _userLastClaimTime= self.contractSellToken.functions._userLastClaimTime(gasAccountWallet).call() 
-                    _userEndClaimTime= self.contractSellToken.functions._userEndClaimTime(gasAccountWallet).call() 
-                    _userStakeTime= self.contractSellToken.functions._userStakeTime(gasAccountWallet).call() 
-                    _userMoonClaimTime= self.contractSellToken.functions._userMoonClaimTime(gasAccountWallet).call() 
-                    _userMoonClaimNumber= self.contractSellToken.functions._userMoonClaimNumber(gasAccountWallet).call() 
-                
+                    # 查看 ymii 余额    1400000000    2000000000000000000000   
+                    # 280000000    400000000000000000000
+                    
+
+                    _userStakeA= myToken['_userStakeA'] *1000000
+                    _userStakeB= myToken['_userStakeA'] /70*100*1000000000000000000
+                    _userStakeStartTime= myToken['_userStakeStartTime'] 
+                    _userLastClaimTime= _userStakeStartTime 
+                    # _userEndClaimTime= myToken['_userStakeA'] 
+                    _userStakeTime= 12960000 # myToken['_userStakeTime']  #12960000 5个月
+                    _userMoonClaimTime= _userStakeStartTime
+                    _userMoonClaimNumber= myToken['_userMoonClaimNumber'] 
+                # 计算事件   根据开始 事件 加上领取次数。
+                    _userEndClaimTime=_userStakeStartTime+12960000
+                    for i in range(_userMoonClaimNumber + 1):
+                        print(i)
+                        _userMoonClaimTime+=2592000
+                        _userLastClaimTime+=2592000*i
+
                     
                     # 第一组变量
                     group1 = {
                             'userAddr': gasAccountWallet,
-                            '_userStakeA': _userStakeA,
-                            '_userStakeB': _userStakeB,
-                            '_userStakeStartTime': _userStakeStartTime,
-                            '_userLastClaimTime': _userLastClaimTime,
-                            '_userEndClaimTime': _userEndClaimTime,
-                            '_userStakeTime': _userStakeTime,
-                            '_userMoonClaimTime': _userMoonClaimTime,
-                            '_userMoonClaimNumber': _userMoonClaimNumber,
+                            '_userStakeA': int(_userStakeA),
+                            '_userStakeB': int(_userStakeB),
+                            '_userStakeStartTime': int(_userStakeStartTime),
+                            '_userLastClaimTime': int(_userLastClaimTime),
+                            '_userEndClaimTime':int( _userEndClaimTime),
+                            '_userStakeTime': int(_userStakeTime),
+                            '_userMoonClaimTime':int( _userMoonClaimTime),
+                            '_userMoonClaimNumber': int(_userMoonClaimNumber),
                             }
 
                     # print(json.dumps(group1, indent=4))
@@ -150,7 +156,7 @@ class DefiAuto(object):
                         tx_hash=self.web3.eth.send_raw_transaction(signed_txn.rawTransaction)             
                     
                         time1 = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                        result=[time1,'数据转移成功:',myToken['ApprovedBuy'] ,group1['userAddr'],group1['_userStakeA'],'token:',gasAccountWallet,self.web3.to_hex(tx_hash)]
+                        result=[time1,'数据转移成功:' ,group1['userAddr'],group1['_userStakeA'],'token:',gasAccountWallet,self.web3.to_hex(tx_hash)]
                         tokenList.append(result)
                         print(result)
                         

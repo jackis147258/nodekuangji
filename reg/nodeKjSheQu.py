@@ -353,20 +353,20 @@ def TDyeJi(t_user,number):  # amount 分润基数  layer 类型0 矿机质押  1
                         # 假设 parentUser.tuanduiLevel 和 tongJi 是某个对象的属性
                         level = parentUser.tuanduiLevel                     
                         # 根据不同的 level 设置比例
-                        if level == 0:
-                            ratio = 0.03
+                        if level == 0:     
+                            ratio = 0.03  #1星社区
                         elif level == 1:
-                            ratio = 0.04
+                            ratio = 0.04  #2星社区
                         elif level == 5:
-                            ratio = 0.05
+                            ratio = 0.05 #3星社区
                         elif level == 10:
-                            ratio = 0.06
+                            ratio = 0.06  #4星社区
                         elif level == 15:
-                            ratio = 0.03
+                            ratio = 0.03  #5星社区
                         elif level == 20:
-                            ratio = 0.03
+                            ratio = 0.03  #6星社区
                         elif level == 21:
-                            ratio = 0.06
+                            ratio = 0.06   #7星社区
                         else:
                             ratio = 0  # 其他情况默认比例为 0
                      

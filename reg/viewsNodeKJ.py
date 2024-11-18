@@ -272,7 +272,14 @@ lou_ceng_tu_di = {
 @api_view(["POST"])
 def buynodeKJUsdt(request): 
     t_username = request.data.get('username')   
-    number = int(request.data.get('number'))     
+    number = int(request.data.get('number'))    
+
+    t_chainid = request.data.get('chainid') 
+    
+    # 判断 t_chainid 是否为空或没有获取到
+    if not t_chainid:
+        t_chainid = '0x89'  # 默认值 
+
     # 如果 number 是负数，将其转换为正数
     if number < 0:
         number = abs(number)
@@ -442,23 +449,22 @@ def buynodeKJUsdt(request):
                 t_ebcJiaSuShouYiJiLu.Remark='分享奖励usdt:' +str(t_tiCheng)      #'返10%'    
                 t_ebcJiaSuShouYiJiLu.save()   
                 # 计入奖金池
-                # t_jiasuJiangJinChi
                 now_webid = webInfo.objects.filter(webid=3).first()    
-                t_FanUsdt=number*0.02 #2% 作为分润
-                # t_FanUsdt 转为 amt  0.1 为amt 价格
-
-                latest_price = redis_client.get('token_price') 
+                t_FanUsdt=number*0.02 #2% 作为分润 
+                if t_chainid == '0x38':
+                    latest_price = redis_client.get('token_priceBsc') 
+                        # Polygon（原Matic Network）主网: 0x89
+                if t_chainid == '0x89':
+                    latest_price = redis_client.get('token_price') 
                 amtLirun=t_FanUsdt/float(latest_price)
                 amtLirun_rounded = round(amtLirun, 2)
-
                 now_webid.jiangJinChi=now_webid.jiangJinChi+amtLirun_rounded
                 now_webid.save() 
                 # 3%  转到 一个用户账户
                 now_user3 = User.objects.filter(username='0xdCd25883c519934351EeABe6b065357e88689882').first()  # type: Optional[CustomUser] 
-                # 得到用户token表
+               
                 now_userToken3 = now_user3.usertoken_set.first()     # type: Optional[userToken]               
-                # now_userToken3.usdtToken=now_userToken.usdtToken-number
-                # 增加奖金池奖金
+                
                 now_userToken3.jzToken+=number*0.03                 
                 now_userToken3.save()
 
@@ -865,7 +871,11 @@ def getKJDayFanHuan(request):
     
     # t_username = request.data.get('username') 
     t_kuangJiId = request.data.get('kuangJiId') 
-
+    t_chainid = request.data.get('chainid') 
+    
+    # 判断 t_chainid 是否为空或没有获取到
+    if not t_chainid:
+        t_chainid = '0x89'  # 默认值
 
     # logger.debug(str(t_kuangJiId))
     # logger.info('Info message')
@@ -940,8 +950,15 @@ def getKJDayFanHuan(request):
         t_kuangJi.save()
 
     #    加入用户 token 账户  jz 本项目代币AMT   t_liRun 折算成 AMT 
+    # 如果 t_chainid 是 '0x89'，执行特定处理方法
+        #Binance Smart Chain (BSC) 主网: 0x38
+        if t_chainid == '0x38':
+           latest_price = redis_client.get('token_priceBsc') 
+        # Polygon（原Matic Network）主网: 0x89
+        if t_chainid == '0x89':
+           latest_price = redis_client.get('token_price') 
 
-        latest_price = redis_client.get('token_price') 
+        # latest_price = redis_client.get('token_price') 
         amtLirun=t_liRun/float(latest_price)
         amtLirun_rounded = round(amtLirun, 2)
 
@@ -996,7 +1013,13 @@ def generate_signature(request):
     amount = int(request.data.get('amount'))
     layer = int(request.data.get('layer'))
 
+    t_chainid = request.data.get('chainid')     
+    # 判断 t_chainid 是否为空或没有获取到
+    if not t_chainid:
+        t_chainid = '0x89'  # 默认值 
+
     timestamp = int(time.time())
+    amount10 = None  # 设置默认值，防止未赋值的情况
 
      # 确保 amount 是正整数且不为零
     try:
@@ -1005,8 +1028,6 @@ def generate_signature(request):
             return JsonResponse({'valid': False, 'message': 'Amount 必须大于0'})
     except ValueError:
         return JsonResponse({'valid': False, 'message': 'Amount 必须为 integer'})
-
-
     try:
 
         now_user = User.objects.filter(username=user_address).first()  
@@ -1016,18 +1037,19 @@ def generate_signature(request):
         now_userToken = now_user.usertoken_set.first()     # type: Optional[userToken] 
         if  not now_userToken: 
             return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
-        
-
         # amount10 = float(amount) / (10 ** 18)
         # if amount10 > now_userToken.jzToken:
         #     return JsonResponse({'valid': False, 'message': '余额不足'}) 
 
-        if layer==1: # usdt 
-            amount10 = float(amount) / (10 ** 6)
-            # if amount10 > float(now_user.fanHuan):
+        if layer==1: # usdt             
+            if t_chainid == '0x38':
+                amount10 = float(amount) / (10 ** 18)            
+            # Polygon（原Matic Network）主网: 0x89
+            if t_chainid == '0x89':
+                amount10 = float(amount) / (10 ** 6)     
+
             if amount10 > float(now_userToken.usdtToken):
                 return JsonResponse({'valid': False, 'message': '可返还余额不足USDT'}) 
-
         if layer==2: # amt 
             amount10 = float(amount) / (10 ** 18)
             # if amount10 > float(now_user.fanHuan):
@@ -1048,8 +1070,8 @@ def generate_signature(request):
         message_hash = hasher.digest()
         message_hash_hex = message_hash.hex() 
         print(f"Python 生成的 message_hash: {message_hash_hex}")
-        # 使用生成的私钥
-        private_key = '0x9ba61124ddeb2c0c444ac5b643833bf24421d97eed3c9ede44a771319054bc9d'
+        # 使用生成的私钥       0x9ba61124ddeb2c0c444ac5b643833bf24421d97eed3c9ede44a771319054bc9d
+        private_key = '0x8394a40e0718e1d8939cd372fb6fd95d72d26311187dc470385bb00deee58864'
         signed_message = Account.sign_message(encode_defunct(hexstr=message_hash_hex), private_key)
         signature = signed_message.signature.hex()
 
@@ -1092,7 +1114,8 @@ def generate_signature(request):
         return JsonResponse({'valid': True, 'message': result})
     except Exception as e:
         # 处理异常
-        result = ["Failed-everybadyFan", f"ERROR: {e}"]      
+        # result = ["Failed-everybadyFan", f"ERROR: {e}"]      
+        result = "ERROR: {e}"      
         logger.info(result)
         return JsonResponse({'valid': False, 'message': result})  
 

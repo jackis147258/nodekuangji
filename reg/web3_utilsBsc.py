@@ -21,14 +21,14 @@ redis_client = redis.StrictRedis(host='localhost', port=6379, db=4)
 class Web3Client:
     def __init__(self):
         # 0x947d6a46FAAe7a198d75e50370BC67B501e6AeD8
-        pancakeRouterAddress = '0x7E7291E719361F008BE41AfBB2184c30a9FEfffF'
+        pancakeRouterAddress = '0x98A9177508E104B9e777A965f8F8EbEf17BE335F'
         # pancakeRouterAddress = config('EbcState_ADDRESS', default='')
 
         self.EbcStateADDRESS = pancakeRouterAddress
         pancakeAbi = tokenAbi(pancakeRouterAddress)  # 合约 ABI 
         # 初始化 Web3 连接
-        # bsc = "https://rpc.ankr.com/bsc/174ba138f2cbc5773ef292c0e0a941ec3f23246439e9f0b8d7bec242a67f8c20"  #免费
-        bsc=config('BSC', default='')
+        bsc = "https://rpc.ankr.com/bsc/174ba138f2cbc5773ef292c0e0a941ec3f23246439e9f0b8d7bec242a67f8c20"  #免费
+        # bsc=config('BSC', default='')
         self.web3 = Web3(Web3.HTTPProvider(bsc))
         if not self.web3.is_connected(): 
             print("Not Connected to BSC wait...")    
@@ -44,8 +44,8 @@ class Web3Client:
 
         from_block = latest_block - 20 if latest_block >= 10 else 0
         to_block = latest_block
-        logger.info('充值记录 ...区块'+str(from_block)+'to:'+str(to_block))
-        logger.info('合约地址'+str(self.EbcStateADDRESS) )
+        logger.info('Bsc充值记录 ...区块'+str(from_block)+'to:'+str(to_block))
+        logger.info('Bsc合约地址'+str(self.EbcStateADDRESS) )
 
 
         # 获取 Deposit 事件日志
@@ -66,7 +66,7 @@ class Web3Client:
         return event_list
 
 
-def format_token_amount(raw_amount, decimals=6):
+def format_token_amount(raw_amount, decimals=18):
     # 将字符串转换为浮点数，并应用小数位转换
     formatted_amount = float(raw_amount) / (10 ** decimals)
     # 返回格式化后的数值，保留两位小数
@@ -74,7 +74,7 @@ def format_token_amount(raw_amount, decimals=6):
 
 def process_deposit_event(event_list):
     # Process the event (e.g., save to database, perform some action)
-    logger.info('获取用户充值记录'+'开始...' )
+    logger.info('Bsc获取用户充值记录'+'开始...' )
     for event_data in event_list:
         try:
             with transaction.atomic():
@@ -88,7 +88,7 @@ def process_deposit_event(event_list):
                 # liuShuiIdObj=ebcJiaSuShouYiJiLu.objects.filter(liuShuiId=event_data['lianId']).first()
                 # 表示已经处理过流水
                 if liuShuiIdObj:                    
-                    logger.info('该笔流水已处理 hash:'+str(hashHex) +' 用户:'+str(event_data['user']) )
+                    logger.info('Bsc该笔流水已处理 hash:'+str(hashHex) +' 用户:'+str(event_data['user']) )
                     continue
 
                 # 获得用户 对象
@@ -96,29 +96,26 @@ def process_deposit_event(event_list):
                     t_user = User.objects.get(username=event_data['user'])
                 except User.DoesNotExist:
                     t_user = None
-                    logger.info('Failed:用户'+str(event_data['user'])+ '不存在' )
+                    logger.info('BscFailed:用户'+str(event_data['user'])+ '不存在' )
                     continue
                 
                 now_userToken = t_user.usertoken_set.first()     # type: Optional[userToken] 
                 if  not now_userToken:                    
-                    logger.info('获取用户充值记录'+str(t_user.id)+'用户token不存在' )
+                    logger.info('Bsc获取用户充值记录'+str(t_user.id)+'用户token不存在' )
                     continue
                 #记录  添加余额   // layer==0  冲 usdt  1  yl   2 jz
                 t_Remark='充值**'
-                # amount10=float(format_token_amount(event_data['amount'],6))
+                amount10=float(format_token_amount(event_data['amount'],18))
                 # 充值
                 if event_data['layer']==0:
-                    amount10=float(format_token_amount(event_data['amount'],6))
                     now_userToken.usdtToken+=amount10
                     now_userToken.save()
                     t_Remark='充值USDT'
                 if event_data['layer']==1:
-                    amount10=float(format_token_amount(event_data['amount'],18))
                     now_userToken.jzToken+=amount10
                     now_userToken.save()
                     t_Remark='充值YS'
                 if event_data['layer']==2:
-                    amount10=float(format_token_amount(event_data['amount'],18))
                     now_userToken.jzToken+=amount10
                     now_userToken.save()
                     t_Remark='充值AMT'
@@ -134,7 +131,7 @@ def process_deposit_event(event_list):
                     hash=event_data['uniqueHash'].hex(),
                     Remark=t_Remark,
                 )
-                logger.info('用户id:'+str(t_user.id)+'用户name:'+str(t_user.username)+t_Remark+str(amount10))
+                logger.info('Bsc用户id:'+str(t_user.id)+'用户name:'+str(t_user.username)+t_Remark+str(amount10))
 
                 
         except Exception as e:
@@ -144,17 +141,17 @@ def process_deposit_event(event_list):
                     logger.info(result)
                     return result
     # Add your processing logic here
-    logger.info('获取用户充值记录'+'结束' )
+    logger.info('Bsc获取用户充值记录'+'结束' )
 
  
 def listen_to_deposit_events():
 
-    if not redis_client.exists('latest_block'):
+    if not redis_client.exists('bscChongZhiblock'):
         # 如果不存在，则将 t_pyUserNumberAll 设置为 0
-        latest_block = 59355519
+        latest_block = 44024615
     else:
         # 如果存在，则从 Redis 中获取值
-        latest_block = redis_client.get('latest_block')  
+        latest_block = redis_client.get('bscChongZhiblock')  
     
     
       
@@ -166,7 +163,7 @@ def listen_to_deposit_events():
     event_list = web3_client.listen_deposit_events(int(latest_block))
     
     process_deposit_event(event_list)
-    redis_client.set('latest_block', str(int(latest_block) + 19)) 
+    redis_client.set('bscChongZhiblock', str(int(latest_block) + 19)) 
 
     # time.sleep(2)
 
