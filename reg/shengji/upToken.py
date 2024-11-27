@@ -164,12 +164,12 @@ class upToken(object):
             print(result)
             return 'ok' 
 
-def getOld():
-    # 得到old数据列表    
-    print('abc')
-    defi= upToken()
-    defi.shenji() 
+# def getOld():
+#     # 得到old数据列表    
+#     print('abc')
+#     defi= upToken()
+#     defi.shenji() 
     
-if __name__ == "__main__":
-    getOld()
+# if __name__ == "__main__":
+#     getOld()
    

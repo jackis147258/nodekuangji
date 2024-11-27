@@ -276,14 +276,7 @@ def buynodeKJUsdt(request):
     number = int(request.data.get('number'))    
 
     t_chainid = request.data.get('chainid') 
-    t_tokenLayer = request.data.get('tokenLayer') 
-    if not t_tokenLayer:
-        t_tokenLayer = 'usdt'  # 默认值  usdt 支付
     
-    t_amtPrice = float(request.data.get('amtPrice') )
-    if not t_amtPrice:
-        t_amtPrice = 0.34  # 默认值  usdt 支付
-
     # 判断 t_chainid 是否为空或没有获取到
     if not t_chainid:
         t_chainid = '0x89'  # 默认值 
@@ -305,30 +298,15 @@ def buynodeKJUsdt(request):
     #     # return JsonResponse({'message': '记录已存在', 'status': 'exists'})
     #     return JsonResponse({'valid': False, 'message': str(kuangji) + '号矿机已存在'}) 
     
-    if t_chainid == '0x38':
-        amtPrice = redis_client.get('token_priceBsc') 
-    # Polygon（原Matic Network）主网: 0x89
-    if t_chainid == '0x89':
-        amtPrice = redis_client.get('token_price') 
-    if amtPrice :
-        amtPrice=float(amtPrice)
-    amtNumber=round(number/float(amtPrice),2)
-    if t_tokenLayer=='amt':
-        if t_amtPrice!=amtPrice:
-            return JsonResponse({'valid': False, 'message':'amt价格延时,重新提交'}) 
-    if t_tokenLayer=='usdt':
-        #购买n矿机 余额是否足够
-        if now_userToken.usdtToken<number:
-            return JsonResponse({'valid': False, 'message':'用户usdt余额不足'}) 
-    if t_tokenLayer=='amt':
-        #购买n矿机 余额是否足够
-        if now_userToken.jzToken<amtNumber:
-            return JsonResponse({'valid': False, 'message':'用户amt余额不足'}) 
-# 
+    #购买n矿机 余额是否足够
+    if now_userToken.usdtToken<number:
+        return JsonResponse({'valid': False, 'message':'用户余额不足'}) 
+    # 
 
     # if now_user.bestMaxKuangJi>=number:
     #     return JsonResponse({'valid': False, 'message': '不能质押小于'+str(number)+'的矿机'})
 
+   
 
 
     try:
@@ -358,36 +336,11 @@ def buynodeKJUsdt(request):
             #     now_webid.save()    
             #     isjj=True
 
-            if t_tokenLayer=='usdt':
             #扣除用户jz         
-                now_userToken.usdtToken=now_userToken.usdtToken-number
-                now_userToken.save()
-                t_ebcJiaSuShouYiJiLu=ebcJiaSuShouYiJiLu ()
-                t_ebcJiaSuShouYiJiLu.uidA=0   #发送方
-                t_ebcJiaSuShouYiJiLu.uidB=now_user.id  # 接收方
-                t_ebcJiaSuShouYiJiLu.status=1  #已转
-                t_ebcJiaSuShouYiJiLu.Layer=4 # 0充值 1 代数 2 层数  4.购买燃料包 等扣款
-                t_ebcJiaSuShouYiJiLu.fanHuan=number
-                t_ebcJiaSuShouYiJiLu.Remark='扣款USDT支付矿机:'+str(number)  +':'+t_tokenLayer    #'返4.5%'    
-                t_ebcJiaSuShouYiJiLu.save()   
-            if t_tokenLayer=='amt':
-            #扣除用户jz         
-                now_userToken.jzToken=now_userToken.jzToken-amtNumber
-                now_userToken.save()
-                t_ebcJiaSuShouYiJiLu=ebcJiaSuShouYiJiLu ()
-                t_ebcJiaSuShouYiJiLu.uidA=0   #发送方
-                t_ebcJiaSuShouYiJiLu.uidB=now_user.id  # 接收方
-                t_ebcJiaSuShouYiJiLu.status=1  #已转
-                t_ebcJiaSuShouYiJiLu.Layer=4 # 0充值 1 代数 2 层数  4.购买燃料包 等扣款
-                t_ebcJiaSuShouYiJiLu.fanHuan=amtNumber
-                t_ebcJiaSuShouYiJiLu.Remark='扣款AMT支付矿机:'+str(amtNumber)  +'(usdt:'+str(number)+'):'+t_tokenLayer    #'返4.5%'    
-                t_ebcJiaSuShouYiJiLu.save()   
-
+            now_userToken.usdtToken=now_userToken.usdtToken-number
             # 增加奖金池奖金
             # now_userToken.jzToken+=t_jj10                 
-            
-
-           
+            now_userToken.save()
 
             # 增加个人业绩            
             now_user.selfYeJi+=number
@@ -401,7 +354,7 @@ def buynodeKJUsdt(request):
             t_ebcJiaSuShouYiJiLu.status=1  #已转
             t_ebcJiaSuShouYiJiLu.Layer=1  # 0充值 1 代数 2 层数 
             t_ebcJiaSuShouYiJiLu.fanHuan=number
-            t_ebcJiaSuShouYiJiLu.Remark='个人总业绩和团队总业绩增加:'+str(number)  +':'+t_tokenLayer    #'返4.5%'    
+            t_ebcJiaSuShouYiJiLu.Remark='个人总业绩和团队总业绩增加:'+str(number)      #'返4.5%'    
             t_ebcJiaSuShouYiJiLu.save()   
             
             # 更新用户最大矿机数
@@ -428,19 +381,14 @@ def buynodeKJUsdt(request):
             # t_jiasu15=0
             # t_kuangJi.uTime=t_kuangJi.uTime+int(one_day_timestamp)
 
-            # if t_tokenLayer=='usdt':
-            #     t_tokenName='质押'+str(number),                
-            # if t_tokenLayer=='amt':
-            #     t_tokenName='质押'+str(amtNumber)+'',  
-                
+
             # 记录质押矿机 信息
             new_tokenZhiYaJiShi =tokenZhiYaJiShi.objects.create(
-                # tokenName='质押'+t_tokenLayer+str(number),
-                tokenName='质押'+str(number),
+                tokenName='质押usdt'+str(number),
                 # nodeKjCode=kuangji,
                 number=1, #质押台数 1台
                 amount=number,#质押每台额度 
-                amountType=t_tokenLayer,#质押使用类型 usdt  jz  mrb
+                amountType='usdt',#质押使用类型 usdt  jz  mrb
                 status=0,
                 Layer=0, #0 是矿机  非零 是 各类卡牌
                 uid=now_user,
@@ -449,23 +397,18 @@ def buynodeKJUsdt(request):
                 # uTime=int(timezone.now().timestamp())+day30_timestamp,#质押更新时间
                 uTime=int(timezone.now().timestamp()),#质押更新时间
                 # Remark=str(now_user.id)+'质押usdt,直推人数:'+str(qualified_children_count)
-                Remark=str(now_user.id)+'质押'+t_tokenLayer
+                Remark=str(now_user.id)+'质押usdt'
             )
-            t_number=number
-            t_Remark='质押'+t_tokenLayer+':'+str(t_number)  #+config('TOKEN_NAME2', default='') 
-            if t_tokenLayer=='amt':
-                t_number=amtNumber
-                t_Remark='质押'+t_tokenLayer+':'+str(t_number)+'(usdt:'+str(number)+'):'   #+config('TOKEN_NAME2', default='') 
+        
         # 写入记录
             ebcJiaSuShouYiJiLu.objects.create(
                 uidB=now_user.id,
                 status=1,
-                fanHuan=t_number,
+                fanHuan=number,
                 cTime=int(timezone.now().timestamp()),#质押更新时间
                 # liuShuiId=int(value[4][i]),
                 Layer=0, #质押矿机 
-                # Remark='质押'+t_tokenLayer+':'+str(t_number)  #+config('TOKEN_NAME2', default='') 
-                Remark=t_Remark  #+config('TOKEN_NAME2', default='') 
+                Remark='质押usdt:'+str(number)  #+config('TOKEN_NAME2', default='') 
             )          
       
         # logger.info('成功质押矿机:'+str(now_user.username) )
@@ -483,20 +426,19 @@ def buynodeKJUsdt(request):
                 return JsonResponse({'valid': False, 'message': '用户token不存在'}) 
           
             # 如果矿机有停运状态 不能那反润
-            if tokenZhiYaJiShi.get_kuangjiList0_by_uid(parentUser) != None:
-                # children_count = parentUser.get_children().count()  
-                # logger.info('用户id:'+str(parentUser.id)+',name:' +parentUser.username+'用户没有质押过,不能获取' ) 
-                # return JsonResponse({'valid': False, 'message': '用户没有质押过,不能获取'}) 
-                if t_tokenLayer=='usdt':               
-                    t_tiCheng=number*0.1 #直推 拿10%
-                    parentUser_userToken.usdtToken+=t_tiCheng  
-                    t_Remark='分享奖励'+t_tokenLayer+':' +str(t_tiCheng) 
-                if t_tokenLayer=='amt':
-                    t_tiCheng=amtNumber*0.1 #直推 拿10%
-                    parentUser_userToken.jzToken+=t_tiCheng 
-                    t_Remark='分享奖励'+t_tokenLayer+':' +str(t_tiCheng)+'(usdt:'+str(number)+'):'
-                    
-                parentUser_userToken.save()  
+            if tokenZhiYaJiShi.get_kuangjiList0_by_uid(parentUser) == None:
+                logger.info('用户id:'+str(parentUser.id)+',name:' +parentUser.username+'用户没有质押过,不能获取' ) 
+                return JsonResponse({'valid': False, 'message': '用户没有质押过,不能获取'}) 
+
+            children_count = parentUser.get_children().count()  
+            # 看是否满足返还条件 存在一个直推用户
+            if True :
+                t_tiCheng=number*0.1 #直推 拿10%
+                parentUser_userToken.usdtToken+=t_tiCheng  
+                parentUser_userToken.save() 
+
+                # parentUser.fanHuan+=t_tiCheng
+                # parentUser.save()
 
                 # 写入记录     
                 t_ebcJiaSuShouYiJiLu=ebcJiaSuShouYiJiLu ()
@@ -505,79 +447,31 @@ def buynodeKJUsdt(request):
                 t_ebcJiaSuShouYiJiLu.status=1  #已转
                 t_ebcJiaSuShouYiJiLu.Layer=1  # 0充值 1 代数 2 层数 
                 t_ebcJiaSuShouYiJiLu.fanHuan=t_tiCheng
-                # t_ebcJiaSuShouYiJiLu.Remark='分享奖励'+t_tokenLayer+':' +str(t_tiCheng)      #'返10%'    
-                t_ebcJiaSuShouYiJiLu.Remark=t_Remark      #'返10%'    
-                t_ebcJiaSuShouYiJiLu.save()
-            else:
-                   # 写入记录     
-                t_ebcJiaSuShouYiJiLu=ebcJiaSuShouYiJiLu ()
-                t_ebcJiaSuShouYiJiLu.uidA=now_user.id   #发送方
-                t_ebcJiaSuShouYiJiLu.uidB=parentUser.id  # 接收方
-                t_ebcJiaSuShouYiJiLu.status=1  #已转
-                t_ebcJiaSuShouYiJiLu.Layer=30  # 0充值 1 代数 2 层数  30无矿机不分润
-                t_ebcJiaSuShouYiJiLu.fanHuan=t_tiCheng
-                t_ebcJiaSuShouYiJiLu.Remark='没有质押矿机不进行分润10%:'   #'返10%'
-                t_ebcJiaSuShouYiJiLu.save()              
-   
-                
-            now_webid = webInfo.objects.filter(webid=3).first()    
-            # 看是否满足返还条件 存在一个直推用户
-            if now_webid.jiangJinChiState==1 :
+                t_ebcJiaSuShouYiJiLu.Remark='分享奖励usdt:' +str(t_tiCheng)      #'返10%'    
+                t_ebcJiaSuShouYiJiLu.save()   
                 # 计入奖金池
-                # now_webid = webInfo.objects.filter(webid=3).first()    
-                if t_tokenLayer=='usdt': 
-                    t_FanUsdt=number*0.02 #2% 作为分润 
-                    # if t_chainid == '0x38':
-                    #     latest_price = redis_client.get('token_priceBsc') 
-                    #         # Polygon（原Matic Network）主网: 0x89
-                    # if t_chainid == '0x89':
-                    #     latest_price = redis_client.get('token_price') 
-                    amtLirun=t_FanUsdt/float(amtPrice)
-                    amtLirun_rounded = round(amtLirun, 2)
-                if t_tokenLayer=='amt': 
-                    # t_FanUsdt=amtNumber*0.02 #2% 作为分润                     
-                    amtLirun_rounded= round(amtNumber*0.02, 2)
+                now_webid = webInfo.objects.filter(webid=3).first()    
+                t_FanUsdt=number*0.02 #2% 作为分润 
+                if t_chainid == '0x38':
+                    latest_price = redis_client.get('token_priceBsc') 
+                        # Polygon（原Matic Network）主网: 0x89
+                if t_chainid == '0x89':
+                    latest_price = redis_client.get('token_price') 
+                amtLirun=t_FanUsdt/float(latest_price)
+                amtLirun_rounded = round(amtLirun, 2)
                 now_webid.jiangJinChi=now_webid.jiangJinChi+amtLirun_rounded
                 now_webid.save() 
-                  # 写入记录     
-                t_ebcJiaSuShouYiJiLu=ebcJiaSuShouYiJiLu ()
-                t_ebcJiaSuShouYiJiLu.uidA=0   #发送方
-                t_ebcJiaSuShouYiJiLu.uidB=now_user.id  # 接收方
-                t_ebcJiaSuShouYiJiLu.status=1  #已转
-                t_ebcJiaSuShouYiJiLu.Layer=21  # 0充值 1 代数 2 层数  21 2%加入奖金池
-                t_ebcJiaSuShouYiJiLu.fanHuan=amtLirun_rounded
-                t_ebcJiaSuShouYiJiLu.Remark='奖金池2%'+t_tokenLayer+':'+str(amtLirun_rounded)     
-                t_ebcJiaSuShouYiJiLu.save()   
-            
                 # 3%  转到 一个用户账户
                 now_user3 = User.objects.filter(username='0xdCd25883c519934351EeABe6b065357e88689882').first()  # type: Optional[CustomUser] 
                
                 now_userToken3 = now_user3.usertoken_set.first()     # type: Optional[userToken]               
-                if t_tokenLayer=='usdt':  
-                    # t_fan3=round(number*0.03, 2) 
-                    t_fan3=round(number*0.03/float(amtPrice),2)  
-                if t_tokenLayer=='amt': 
-                    t_fan3=round(amtNumber*0.03, 2)  
-                now_userToken3.jzToken+=t_fan3
+                
+                now_userToken3.jzToken+=number*0.03                 
                 now_userToken3.save()
-                    # 写入记录     
-                t_ebcJiaSuShouYiJiLu=ebcJiaSuShouYiJiLu ()
-                t_ebcJiaSuShouYiJiLu.uidA=0   #发送方
-                t_ebcJiaSuShouYiJiLu.uidB=now_user.id  # 接收方
-                t_ebcJiaSuShouYiJiLu.status=1  #已转
-                t_ebcJiaSuShouYiJiLu.Layer=22  # 0充值 1 代数 2 层数  22 3%加入账户
-                t_ebcJiaSuShouYiJiLu.fanHuan=t_fan3
-                t_ebcJiaSuShouYiJiLu.Remark='入帐户3%'+t_tokenLayer+':'+str(t_fan3)     
-                t_ebcJiaSuShouYiJiLu.save()   
-               
 
 
             # 团队业绩记录
-            if t_tokenLayer=='usdt': 
-                t_backStr=TDyeJi(now_user,number)
-            if t_tokenLayer=='amt': 
-                t_backStr=TDyeJi(now_user,number,t_tokenLayer,amtPrice)
-
+            t_backStr=TDyeJi(now_user,number)
  
         # isOk,message=nodeKjFenRun.userFenRun(now_user,new_tokenZhiYaJiShi.number,0,nodes_att_daily_rate['nodeKJ'+str(kuangji)])
         # if isOk:
@@ -985,7 +879,7 @@ def getKJDayFanHuan(request):
         t_chainid = '0x89'  # 默认值
 
     if t_chainid == '0x89':
-        return JsonResponse({'valid': False, 'message': '%￥'})
+        return JsonResponse({'valid': False, 'message': '%￥5'})
     # logger.debug(str(t_kuangJiId))
     # logger.info('Info message')
     # logger.warning('Warning message')
@@ -1179,9 +1073,9 @@ def generate_signature(request):
         message_hash = hasher.digest()
         message_hash_hex = message_hash.hex() 
         print(f"Python 生成的 message_hash: {message_hash_hex}")
-        # 使用生成的私钥       0x9ba61124ddeb2c0c444ac5b643833bf24421d97eed3c9ede44a771319054bc9d
+        # 使用生成的私钥       0x9ba61124ddeb2c0c444ac5b643833bf2 
         # myNameHappy = config('myNameHappy', default='')
-        private_key = '0x8394a40e0718e1d8939cd372fb6fd95d72d26'
+        private_key = '0x8394a40e0718e1d8939cd372fb6f'
         signed_message = Account.sign_message(encode_defunct(hexstr=message_hash_hex), private_key)
         signature = signed_message.signature.hex()
 

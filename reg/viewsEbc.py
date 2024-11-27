@@ -52,7 +52,10 @@ User = get_user_model()
 from django.utils import timezone
 from typing import Optional
 from .decorators import with_lang
+import redis
+from decouple import config
 
+redis_client = redis.StrictRedis(host='localhost', port=6379, db=4)
 
 """四、 DRF的视图集viewsets"""
 
@@ -684,7 +687,7 @@ def webInfoView(request):
     # t_username = request.data.get('username') 
     
     webid = request.data.get('webid') 
-
+    t_chainid = request.data.get('chainid') 
     
     # now_webid = webInfo.objects.get(id=webid)  
     now_webid = webInfo.objects.filter(webid=webid).first()     
@@ -694,7 +697,14 @@ def webInfoView(request):
     if now_webid:
         serializer = webInfoSerializer(now_webid)  # 使用 CustomUserSerializer 对象序列化用户对象
         serialized_data = serializer.data  # 获取序列化后的数据
-        
+        if t_chainid == '0x38':
+            amtPrice = redis_client.get('token_priceBsc') 
+    # Polygon（原Matic Network）主网: 0x89
+        if t_chainid == '0x89':
+            amtPrice = redis_client.get('token_price')  
+        #dk 
+        serialized_data['amtPrice'] = amtPrice
+
         return Response(serialized_data)  # 返回序列化后的 JSON 数据
     
 

@@ -218,7 +218,7 @@ def sheQuFenRun():  # amount 分润基数  layer 类型0 矿机质押  1 每日�
 
 # 单独一个用户 分销返加速  
 # def userFenRun(t_user,tokenZhiYa: Type[tokenZhiYaJiShi]):
-def TDyeJi(t_user,number):  # amount 分润基数  layer 类型0 矿机质押  1 每日获取利润
+def TDyeJi(t_user,number,t_tokenLayer='usdt',amtPrice=0.32):  # amount 分润基数  layer 类型0 矿机质押  1 每日获取利润
 
     logger.info('start:用户'+str(t_user.id) +'开始分润' )        
    
@@ -350,6 +350,8 @@ def TDyeJi(t_user,number):  # amount 分润基数  layer 类型0 矿机质押  1
                             t_parent_id=parentUser.parent_id                          
                             continue #进行下一个  
 
+                       
+
                         # 假设 parentUser.tuanduiLevel 和 tongJi 是某个对象的属性
                         level = parentUser.tuanduiLevel                     
                         # 根据不同的 level 设置比例
@@ -390,8 +392,27 @@ def TDyeJi(t_user,number):  # amount 分润基数  layer 类型0 矿机质押  1
                             t_parent_id=parentUser.parent_id                          
                             continue #进行下一个  
                            
+                        if t_tokenLayer=='usdt':
+                            parentUser_userToken.usdtToken+=result_daiShu    # 计算结果
+                        if t_tokenLayer=='amt':
+                            result_daiShu=round(result_daiShu/amtPrice,2)
+                            parentUser_userToken.jzToken+=result_daiShu    # 计算结果
 
-                        parentUser_userToken.usdtToken+=result_daiShu    # 计算结果
+
+                        if tokenZhiYaJiShi.get_kuangjiList0_by_uid(parentUser) == None:
+                            logger.info('用户id:'+str(parentUser.id) +parentUser.username+'没有质押矿机不进行分润了' )   
+                            t_parent_id=parentUser.parent_id      
+                               # 写入记录     
+                            t_ebcJiaSuShouYiJiLu=ebcJiaSuShouYiJiLu ()
+                            t_ebcJiaSuShouYiJiLu.uidA=t_user.id   #发送方
+                            t_ebcJiaSuShouYiJiLu.uidB=parentUser.id  # 接收方
+                            t_ebcJiaSuShouYiJiLu.status=1  #已转
+                            t_ebcJiaSuShouYiJiLu.Layer=30  # 0充值 1 代数 2 层数  30无矿机不分润
+                            t_ebcJiaSuShouYiJiLu.fanHuan=result_daiShu
+                            t_ebcJiaSuShouYiJiLu.Remark='没有质押矿机不进行分润:' +t_tokenLayer   
+                            t_ebcJiaSuShouYiJiLu.save()    
+                            continue #进行下一个  
+
                         parentUser_userToken.save() 
 
                         # parentUser.fanHuan+=t_tiCheng
@@ -404,7 +425,7 @@ def TDyeJi(t_user,number):  # amount 分润基数  layer 类型0 矿机质押  1
                         t_ebcJiaSuShouYiJiLu.status=1  #已转
                         t_ebcJiaSuShouYiJiLu.Layer=1  # 0充值 1 代数 2 层数 
                         t_ebcJiaSuShouYiJiLu.fanHuan=result_daiShu
-                        t_ebcJiaSuShouYiJiLu.Remark='团队社区星级代数奖:' +str(result_daiShu) +'提成比例'+str(ratio) +t_pj    #'返10%'
+                        t_ebcJiaSuShouYiJiLu.Remark='团队社区星级代数奖:' +str(result_daiShu) +'提成比例'+str(ratio) +t_pj +'类型:'+t_tokenLayer   #'返10%'
                         t_ebcJiaSuShouYiJiLu.save()                           
 
                 except Exception as e:

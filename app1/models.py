@@ -222,6 +222,11 @@ class webInfo(models.Model):
     # 站点 奖金池
     jiangJinChi= models.FloatField(db_comment='奖金池',verbose_name="奖金池", blank=True, null=True,default=0)
 
+    jiangJinChiChoices=[      
+            (1,"开"),
+            (0,"关"),
+        ]
+    jiangJinChiState=models.SmallIntegerField(verbose_name="奖金池开关",choices=jiangJinChiChoices,blank=True, null=True,default=1,db_comment=' 奖金池开关')
 
 
 
